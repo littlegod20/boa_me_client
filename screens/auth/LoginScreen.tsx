@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { View, Text, Button, TextInput, StyleSheet } from "react-native";
+import { View, Text, Button, TextInput, StyleSheet, ScrollView } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { useLoginMutation } from "../../hooks/useAuth";
-import { fonts } from "../../constants/theme";
+import { colors, fonts } from "../../constants/theme";
+import Input from "../../components/shared/Input";
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>
 
 type Props = {
     navigation: LoginScreenNavigationProp
 }
+
+
 
 export default function LoginScreen({navigation}: Props) {
     const [email, setEmail] = useState('')
@@ -22,12 +25,11 @@ export default function LoginScreen({navigation}: Props) {
     }
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Boame</Text>
+        <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.title}>ama</Text>
             <View style={styles.form}>
-                <View style={styles.fieldGroup}>
-                    <Text style={styles.label}>Email address</Text>
-                    <TextInput
+                    <Input
+                        label="Email address"
                         style={styles.input}
                         placeholder="Enter your email"
                         value={email}
@@ -37,7 +39,6 @@ export default function LoginScreen({navigation}: Props) {
                         autoCorrect={false}
                         textContentType="emailAddress"
                     />
-                </View>
                 <View style={styles.fieldGroup}>
                     <Text style={styles.label}>Password</Text>
                     <View style={styles.passwordRow}>
@@ -70,7 +71,7 @@ export default function LoginScreen({navigation}: Props) {
             <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
                 Don't have an account? Register
             </Text>
-        </View>
+        </ScrollView>
     )
 }
 
@@ -80,13 +81,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 24,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.background,
     },
     title: {
         fontSize: 24,
         fontFamily: fonts.logo,
         marginBottom: 8,
-        color: '#93c5fd',
+        color: colors.primary,
     },
     form: {
         width: '100%',
@@ -100,11 +101,11 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         marginBottom: 4,
-        color: '#374151',
+        color: colors.primary,
     },
     input: {
         borderWidth: 1,
-        borderColor: '#d1d5db',
+        borderColor: colors.border,
         borderRadius: 4,
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#d1d5db',
+        borderColor: colors.border,
         borderRadius: 4,
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -125,15 +126,15 @@ const styles = StyleSheet.create({
     },
     togglePassword: {
         marginLeft: 8,
-        color: '#3b82f6',
+        color: colors.primary,
     },
     error: {
-        color: '#ef4444',
+        color: colors.error,
         fontSize: 14,
         marginTop: 4,
     },
     registerLink: {
-        color: '#3b82f6',
+        color: colors.primary,
         marginTop: 24,
     },
 });

@@ -1,16 +1,16 @@
 export const colors = {
-    primary: '#3b82f6',
-    primaryLight: '#93c5fd',
-    primaryDark: '#1d4ed8',
-    secondary: '#10b981',
-    background: '#ffffff',
-    surface: '#f9fafb',
-    text: '#111827',
-    textSecondary: '#6b7280',
-    border: '#d1d5db',
-    error: '#ef4444',
-    success: '#22c55e',
-    warning: '#f59e0b',
+    primary: '#0E7E7E',
+    primaryLight: '#5BBFBF',
+    primaryDark: '#085858',
+    secondary: '#C0622A',
+    background: '#FDFAF6',
+    surface: '#F5EFE7',
+    text: '#1C1410',
+    textSecondary: '#7A6A58',
+    border: '#DDD3C5',
+    error: '#D94040',
+    success: '#2E8C5A',
+    warning: '#D97B06',
 }
 
 export const fonts = {
