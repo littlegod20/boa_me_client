@@ -23,6 +23,19 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Abres.ttf",
+            "./assets/fonts/Montserrat-Regular.ttf",
+            "./assets/fonts/Montserrat-Medium.ttf",
+            "./assets/fonts/Montserrat-SemiBold.ttf"
+          ]
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "e1fb384e-877e-4d7e-a870-0d82bcf664f3"
