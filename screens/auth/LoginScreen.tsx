@@ -1,10 +1,15 @@
-import { useState } from "react";
-import { View, Text, Button, TextInput, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { useLoginMutation } from "../../hooks/useAuth";
-import { colors, fonts } from "../../constants/theme";
-import Input from "../../components/shared/Input";
+import { colors, fonts, spacing, typography } from "../../constants/theme";
+import BoameInput, { ToggleInput } from "../../components/shared/Input";
+import BoameBtn from "../../components/shared/BoameBtn";
+import { loginSchema } from "../../validators/auth.validator";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import z from "zod";
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -12,129 +17,108 @@ type Props = {
     navigation: LoginScreenNavigationProp
 }
 
-
-
 export default function LoginScreen({navigation}: Props) {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const {control, handleSubmit, formState: {errors}} = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
+    })
     const { mutate, isPending, error} = useLoginMutation()
-    const [showPassword, setShowPassword] = useState(false);
 
-    const handleLogin = () => {
-        mutate({email, password})
+    const handleLogin: SubmitHandler<z.infer<typeof loginSchema>> = (data) => {
+        mutate(data)
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>ama</Text>
+        <KeyboardAwareScrollView 
+            contentContainerStyle={styles.container}
+            keyboardShouldPersistTaps="handled"
+            extraScrollHeight={20}
+            enableOnAndroid={true}
+        >
+            <Text style={styles.title}>Boa me</Text>
             <View style={styles.form}>
-                    <Input
-                        label="Email address"
-                        style={styles.input}
-                        placeholder="Enter your email"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        textContentType="emailAddress"
-                    />
-                <View style={styles.fieldGroup}>
-                    <Text style={styles.label}>Password</Text>
-                    <View style={styles.passwordRow}>
-                        <TextInput
-                            style={styles.passwordInput}
+                <Controller
+                    control={control}
+                    name="email"
+                    render={({field: {onChange, onBlur, value}}) => (
+                        <BoameInput
+                            label="Email address"
+                            style={styles.input}
+                            placeholder="Enter your email"
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            value={value}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            textContentType="emailAddress"
+                            error={errors.email?.message}
+                        />
+                    )}
+                />
+
+                <Controller
+                    control={control}
+                    name="password"
+                    render={({field: {onChange, onBlur, value}}) => (
+                        <ToggleInput
+                            label="Password"
+                            style={styles.input}
                             placeholder="Enter your password"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={!showPassword}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            value={value}
                             autoCapitalize="none"
                             autoCorrect={false}
                             textContentType="password"
+                            error={errors.password?.message}
                         />
-                        <Text
-                            style={styles.togglePassword}
-                            onPress={() => setShowPassword(prev => !prev)}
-                            accessibilityRole="button"
-                        >
-                            {showPassword ? 'Hide' : 'Show'}
-                        </Text>
-                    </View>
-                </View>
-                {error && <Text style={styles.error}>{error.message}</Text>}
-                <Button
-                    title={isPending ? "Logging in..." : "Login"}
-                    onPress={handleLogin}
-                    disabled={isPending}
+                    )}
                 />
+                <BoameBtn
+                    title="Login"
+                    loading={isPending}
+                    onPress={handleSubmit(handleLogin)}
+                />
+                {error && <Text style={styles.error}>{error.message}</Text>}
             </View>
-            <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
-                Don't have an account? Register
+            <Text style={styles.registerLink} onPress={() => navigation.navigate("Register")}>
+                Don&apos;t have an account? Register
             </Text>
-        </ScrollView>
+        </KeyboardAwareScrollView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 24,
         backgroundColor: colors.background,
     },
     title: {
-        fontSize: 24,
+        fontSize: typography.sizes.xxl,
         fontFamily: fonts.logo,
-        marginBottom: 8,
         color: colors.primary,
+        marginBottom: spacing.lg,
     },
     form: {
         width: '100%',
-        fontFamily: fonts.regular,
         maxWidth: 448,
         gap: 24,
     },
-    fieldGroup: {
-        marginBottom: 12,
-    },
-    label: {
-        fontSize: 16,
-        marginBottom: 4,
-        color: colors.primary,
-    },
     input: {
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 4,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-    },
-    passwordRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 4,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-    },
-    passwordInput: {
-        flex: 1,
-        paddingHorizontal: 0,
-        paddingVertical: 0,
-    },
-    togglePassword: {
-        marginLeft: 8,
-        color: colors.primary,
+        fontFamily: fonts.regular,
     },
     error: {
         color: colors.error,
-        fontSize: 14,
+        fontSize: typography.sizes.sm,
+        fontFamily: fonts.regular,
         marginTop: 4,
     },
     registerLink: {
         color: colors.primary,
         marginTop: 24,
+        fontFamily: fonts.regular,
     },
 });
