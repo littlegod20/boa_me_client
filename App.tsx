@@ -3,12 +3,15 @@ import RootNavigator from './navigation';
 import { useFonts } from 'expo-font';
 import { fonts } from "./constants/theme";
 import { useEffect } from "react";
-// import * as SplashScreen from 'expo-splash-screen';
+import { ThemeProvider } from "./context/ThemeContext";
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient()
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     [fonts.logo]: require('./assets/fonts/Abres.ttf'),
     [fonts.regular]: require('./assets/fonts/Montserrat-Regular.ttf'),
     [fonts.medium]: require('./assets/fonts/Montserrat-Medium.ttf'),
@@ -16,16 +19,18 @@ export default function App() {
   })
 
   useEffect(() => {
-    if (fontsLoaded) {
-      // SplashScreen.hideAsync()
-      console.log('Fonts loaded')
+    if (fontsLoaded || fontError) {
+        SplashScreen.hideAsync();
     }
-  }, [fontsLoaded])
+  }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded) return null;
+if (!fontsLoaded && !fontError) return null;
+
   return (
     <QueryClientProvider client={queryClient}>
-      <RootNavigator/>
+      <ThemeProvider>
+        <RootNavigator/>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

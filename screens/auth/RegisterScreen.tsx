@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
-import { colors, fonts, spacing, typography } from "../../constants/theme";
+import { fonts, spacing, typography } from "../../constants/theme";
 import BoameInput, { BoamePhoneInput, ToggleInput } from "../../components/shared/Input";
 import BoameBtn from "../../components/shared/BoameBtn";
 import { registerSchema } from "../../validators/auth.validator";
@@ -10,7 +10,11 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useRegisterMutation } from "../../hooks/useAuth";
+import { useGoogleSignInMutation } from "../../hooks/useGoogleAuth";
+import GoogleSignInBtn from "../../components/shared/GoogleSignInBtn";
+import AuthDivider from "../../components/shared/AuthDivider";
 import { Role } from "../../types/auth.types";
+import { useTheme } from "../../context/ThemeContext";
 
 type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, "Register">;
 
@@ -33,7 +37,9 @@ export default function RegisterScreen({ navigation }: Props) {
         },
     });
     const { mutate, isPending, error } = useRegisterMutation();
+    const { mutate: signInWithGoogle, isPending: isGooglePending, error: googleError } = useGoogleSignInMutation();
     const selectedRole = watch("role");
+    const { colors } = useTheme();
 
     const handleRegister: SubmitHandler<z.infer<typeof registerSchema>> = (data) => {
         mutate(data);
@@ -42,12 +48,12 @@ export default function RegisterScreen({ navigation }: Props) {
 
     return (
         <KeyboardAwareScrollView
-            contentContainerStyle={styles.container}
+            contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
             keyboardShouldPersistTaps="handled"
             extraScrollHeight={20}
             enableOnAndroid
         >
-            <Text style={styles.title}>Create account</Text>
+            <Text style={[styles.title, { color: colors.primary }]}>Create account</Text>
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -121,7 +127,7 @@ export default function RegisterScreen({ navigation }: Props) {
                 />
 
                 <View style={styles.roleGroup}>
-                    <Text style={styles.roleLabel}>I am a</Text>
+                    <Text style={[styles.roleLabel, { color: colors.primary }]}>I am a</Text>
                     <View style={styles.roleRow}>
                         {roleOptions.map(({ label, value }) => (
                             <Pressable
@@ -130,13 +136,14 @@ export default function RegisterScreen({ navigation }: Props) {
                                 onPress={() => setValue("role", value, { shouldValidate: true })}
                                 style={[
                                     styles.roleOption,
-                                    selectedRole === value && styles.roleOptionSelected,
+                                    selectedRole === value && {borderColor: colors.primary, backgroundColor: colors.primary },
+                                    { borderColor: colors.border },
                                 ]}
                             >
                                 <Text
                                     style={[
-                                        styles.roleOptionText,
-                                        selectedRole === value && styles.roleOptionTextSelected,
+                                        {...styles.roleOptionText, color: colors.text},
+                                        selectedRole === value && {color: colors.text},
                                     ]}
                                 >
                                     {label}
@@ -154,9 +161,17 @@ export default function RegisterScreen({ navigation }: Props) {
                     loading={isPending}
                     onPress={handleSubmit(handleRegister)}
                 />
-                {error && <Text style={styles.error}>{error.message}</Text>}
+                {error && <Text style={[styles.error, { color: colors.error }]}>{error.message}</Text>}
+                <AuthDivider />
+                <GoogleSignInBtn
+                    title="Sign up with Google"
+                    loading={isGooglePending}
+                    disabled={isPending}
+                    onPress={() => signInWithGoogle()}
+                />
+                {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
             </View>
-            <Text style={styles.loginLink} onPress={() => navigation.navigate("Login")}>
+            <Text style={[styles.loginLink, { color: colors.primary }]} onPress={() => navigation.navigate("Login")}>
                 Already have an account? Login
             </Text>
         </KeyboardAwareScrollView>
@@ -167,20 +182,19 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         alignItems: "center",
-        justifyContent: "center",
         paddingHorizontal: 24,
-        backgroundColor: colors.background,
+        paddingTop: 96,
+        paddingBottom: 100,
     },
     title: {
         fontSize: typography.sizes.xxl,
         fontFamily: fonts.logo,
-        color: colors.primary,
         marginBottom: spacing.lg,
     },
     form: {
         width: "100%",
         maxWidth: 448,
-        gap: 24,
+        gap: 10,
     },
     input: {
         fontFamily: fonts.regular,
@@ -191,8 +205,7 @@ const styles = StyleSheet.create({
     roleLabel: {
         fontSize: typography.sizes.sm,
         fontFamily: fonts.regular,
-        marginBottom: spacing.sm,
-        color: colors.primary,
+        marginBottom: spacing.sm
     },
     roleRow: {
         flexDirection: "row",
@@ -203,31 +216,20 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingVertical: spacing.sm + 4,
         borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        backgroundColor: colors.surface,
-    },
-    roleOptionSelected: {
-        borderColor: colors.primary,
-        backgroundColor: colors.primary,
+        borderRadius: 12
     },
     roleOptionText: {
         fontSize: typography.sizes.md,
         fontFamily: fonts.medium,
-        color: colors.text,
-    },
-    roleOptionTextSelected: {
-        color: colors.background,
     },
     error: {
-        color: colors.error,
         fontSize: typography.sizes.sm,
         fontFamily: fonts.regular,
         marginTop: 4,
     },
     loginLink: {
-        color: colors.primary,
         marginTop: spacing.lg,
         fontFamily: fonts.regular,
+        paddingBottom: 100,
     },
 });

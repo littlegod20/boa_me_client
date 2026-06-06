@@ -2,7 +2,10 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { useLoginMutation } from "../../hooks/useAuth";
-import { colors, fonts, spacing, typography } from "../../constants/theme";
+import { useGoogleSignInMutation } from "../../hooks/useGoogleAuth";
+import GoogleSignInBtn from "../../components/shared/GoogleSignInBtn";
+import AuthDivider from "../../components/shared/AuthDivider";
+import { fonts, spacing, typography } from "../../constants/theme";
 import BoameInput, { ToggleInput } from "../../components/shared/Input";
 import BoameBtn from "../../components/shared/BoameBtn";
 import { loginSchema } from "../../validators/auth.validator";
@@ -10,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
+import { useTheme } from "../../context/ThemeContext";
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -22,19 +26,20 @@ export default function LoginScreen({navigation}: Props) {
         resolver: zodResolver(loginSchema),
     })
     const { mutate, isPending, error} = useLoginMutation()
-
+    const { mutate: signInWithGoogle, isPending: isGooglePending, error: googleError } = useGoogleSignInMutation()
+    const { colors } = useTheme();
     const handleLogin: SubmitHandler<z.infer<typeof loginSchema>> = (data) => {
         mutate(data)
     }
 
     return (
         <KeyboardAwareScrollView 
-            contentContainerStyle={styles.container}
+            contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
             keyboardShouldPersistTaps="handled"
             extraScrollHeight={20}
             enableOnAndroid={true}
         >
-            <Text style={styles.title}>Boa me</Text>
+            <Text style={[styles.title, { color: colors.primary }]}>Boa me</Text>
             <View style={styles.form}>
                 <Controller
                     control={control}
@@ -79,9 +84,17 @@ export default function LoginScreen({navigation}: Props) {
                     loading={isPending}
                     onPress={handleSubmit(handleLogin)}
                 />
-                {error && <Text style={styles.error}>{error.message}</Text>}
+                {error && <Text style={[styles.error, { color: colors.error }]}>{error.message}</Text>}
+                <AuthDivider />
+                <GoogleSignInBtn
+                    title="Log in with Google"
+                    loading={isGooglePending}
+                    disabled={isPending}
+                    onPress={() => signInWithGoogle()}
+                />
+                {googleError && <Text style={[styles.error, { color: colors.error }]}>{googleError.message}</Text>}
             </View>
-            <Text style={styles.registerLink} onPress={() => navigation.navigate("Register")}>
+            <Text style={[styles.registerLink, { color: colors.primary }]} onPress={() => navigation.navigate("Register")}>
                 Don&apos;t have an account? Register
             </Text>
         </KeyboardAwareScrollView>
@@ -92,32 +105,29 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         alignItems: 'center',
-        justifyContent: 'center',
         paddingHorizontal: 24,
-        backgroundColor: colors.background,
+        paddingTop: 96,
+        paddingBottom: 100,
     },
     title: {
         fontSize: typography.sizes.xxl,
         fontFamily: fonts.logo,
-        color: colors.primary,
         marginBottom: spacing.lg,
     },
     form: {
         width: '100%',
         maxWidth: 448,
-        gap: 24,
+        gap: 10,
     },
     input: {
         fontFamily: fonts.regular,
     },
     error: {
-        color: colors.error,
         fontSize: typography.sizes.sm,
         fontFamily: fonts.regular,
         marginTop: 4,
     },
     registerLink: {
-        color: colors.primary,
         marginTop: 24,
         fontFamily: fonts.regular,
     },

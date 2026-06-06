@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {createStackNavigator} from '@react-navigation/stack'
 import {NavigationContainer} from '@react-navigation/native'
 import {useAuthStore} from '../store/authStore'
@@ -6,15 +6,21 @@ import AuthNavigator from './AuthNavigator'
 import ProviderNavigator from './ProviderNavigator'
 import CustomerNavigator from './CustomerNavigator'
 import * as Linking from 'expo-linking'
+import { LinkingOptions } from '@react-navigation/native'
+
+type RootParamList = {
+    Auth: undefined,
+    Provider: undefined,
+    Customer: undefined
+}
 
 const prefix = Linking.createURL('/')
 
-const linking = {
+const linking: LinkingOptions<RootParamList> = {
     prefixes: [prefix, 'boame://'],
     config: {
         screens: {
             Auth:{
-                path: 'auth',
                 screens: {
                     Login: 'login',
                     Register: 'register',
@@ -25,11 +31,11 @@ const linking = {
     }
 }
 
-const Stack = createStackNavigator()
+const Stack = createStackNavigator<RootParamList>()
 
 export default function RootNavigator () {
     const {token, user} = useAuthStore()
-
+    
     return (
     <NavigationContainer linking={linking}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>

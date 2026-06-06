@@ -1,10 +1,19 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet, Button } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuthStore } from "../store/authStore";
 
 export default function CustomerNavigator() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Customer Home</Text>
+            <Button title="Sign Out" onPress={() => {
+                console.log('Signing out')
+                console.log('Zustand token in customer navigator:', useAuthStore.getState().token)
+                AsyncStorage.clear()
+                useAuthStore.getState().logout()
+            }} />
+
         </View>
     )
 }

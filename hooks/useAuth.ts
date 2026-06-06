@@ -1,15 +1,16 @@
 import { useMutation } from "@tanstack/react-query"
-import { loginUser, registerUser } from "../services/auth.service"
-import AsyncStorage from "@react-native-async-storage/async-storage"
+import { loginUser, registerUser, verifyEmail } from "../services/auth.service"
 import { useAuthStore } from "../store/authStore"
 import { registerSchema } from "../validators/auth.validator"
 import z from "zod"
+import { useNavigation } from "@react-navigation/native"
+import { AuthStackParamList } from "../navigation/types"
+import { StackNavigationProp } from "@react-navigation/stack"
 
 export const useLoginMutation = () => {
     return useMutation({
         mutationFn: ({email, password}: {email: string, password: string}) => loginUser(email, password),
         onSuccess: (data) => {
-            AsyncStorage.setItem('token', data.token)
             useAuthStore.getState().setAuth(data.token, data.user)
         },
         onError: (error) => {
@@ -19,9 +20,22 @@ export const useLoginMutation = () => {
 }
 
 export const useRegisterMutation = () => {
+    const navigation = useNavigation<StackNavigationProp<AuthStackParamList, 'Register'>>()
     return useMutation({
         mutationFn: ({ name, email, password, role, phone_number }: z.infer<typeof registerSchema>) =>
             registerUser(name, email, password, role, phone_number),
+        onSuccess: (data) => {
+            navigation.navigate('VerifyEmail', { email: data.email })
+        },
+        onError: (error) => {
+            console.log(error)
+        },
+    })
+}
+
+export const useVerifyEmailMutation = () => {
+    return useMutation({
+        mutationFn: ({ token }: { token: string }) => verifyEmail(token),
         onSuccess: (data) => {
             console.log(data)
         },

@@ -6,7 +6,8 @@ import {
     Text,
     ViewStyle,
 } from "react-native";
-import { borderRadius, colors, fonts, spacing, typography } from "../../constants/theme";
+import { borderRadius, fonts, spacing, typography } from "../../constants/theme";
+import { useTheme } from "../../context/ThemeContext";
 
 type Variant = "primary" | "secondary" | "outline";
 
@@ -27,6 +28,15 @@ export default function BoameBtn({
     ...props
 }: BoameBtnProps) {
     const isDisabled = disabled || loading;
+    const { colors } = useTheme();
+
+    const variantStyle: ViewStyle =
+        variant === "primary" ? { backgroundColor: colors.primary } :
+        variant === "secondary" ? { backgroundColor: colors.secondary } :
+        { backgroundColor: "transparent", borderWidth: 1, borderColor: colors.primary }
+
+    const labelColor =
+        variant === "outline" ? colors.primary : colors.background
 
     return (
         <Pressable
@@ -36,7 +46,7 @@ export default function BoameBtn({
             style={({ pressed }) => [
                 styles.base,
                 fullWidth && styles.fullWidth,
-                variantStyles[variant],
+                variantStyle,
                 isDisabled && styles.disabled,
                 pressed && !isDisabled && styles.pressed,
                 style as ViewStyle,
@@ -49,37 +59,11 @@ export default function BoameBtn({
                     size="small"
                 />
             ) : (
-                <Text style={[styles.label, labelStyles[variant]]}>{title}</Text>
+                <Text style={[styles.label, { color: labelColor }]}>{title}</Text>
             )}
         </Pressable>
     );
 }
-
-const variantStyles = StyleSheet.create({
-    primary: {
-        backgroundColor: colors.primary,
-    },
-    secondary: {
-        backgroundColor: colors.secondary,
-    },
-    outline: {
-        backgroundColor: "transparent",
-        borderWidth: 1,
-        borderColor: colors.primary,
-    },
-});
-
-const labelStyles = StyleSheet.create({
-    primary: {
-        color: colors.background,
-    },
-    secondary: {
-        color: colors.background,
-    },
-    outline: {
-        color: colors.primary,
-    },
-});
 
 const styles = StyleSheet.create({
     base: {

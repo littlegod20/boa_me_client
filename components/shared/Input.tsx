@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
-import { borderRadius, colors, fonts, typography } from "../../constants/theme";
+import { borderRadius, fonts, typography } from "../../constants/theme";
 import {Eye, EyeClosed} from 'lucide-react-native'
 import PhoneInput, { PhoneInputProps } from "react-native-phone-number-input";
+import { useTheme } from "../../context/ThemeContext";
 
 export type InputProps = TextInputProps & {
     label: string
@@ -16,18 +17,19 @@ export type BoamePhoneInputProps = PhoneInputProps & {
 }
 
 export function BoamePhoneInput({label, error, onChangeFormattedText, ...props}: BoamePhoneInputProps) {
+    const { colors } = useTheme();
     return (
         <View style={styles.fieldGroup}>
-            <Text style={styles.label}>{label}</Text>
+            <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
             <PhoneInput
                 defaultCode="GH"
                 layout="first"
                 placeholder="Enter your phone number"
                 onChangeFormattedText={onChangeFormattedText}
-                containerStyle={styles.phoneContainer}
-                textContainerStyle={styles.phoneTextContainer}
-                textInputStyle={styles.phoneTextInput}
-                codeTextStyle={styles.phoneCodeText}
+                containerStyle={{...styles.phoneContainer, borderColor: colors.border}}
+                textContainerStyle={{...styles.phoneTextContainer, backgroundColor: colors.background}}
+                textInputStyle={{...styles.phoneTextInput, color: colors.text}}
+                codeTextStyle={{...styles.phoneCodeText, color: colors.text}}
                 flagButtonStyle={styles.flagHidden}
                 {...props}
             />
@@ -37,24 +39,26 @@ export function BoamePhoneInput({label, error, onChangeFormattedText, ...props}:
 }
 
 export default function BoameInput({label, error, style, ...props}: InputProps) {
+    const { colors } = useTheme();
     return (
         <View style={styles.fieldGroup}>
-            <Text style={styles.label}>{label}</Text>
-            <TextInput {...props} style={[styles.input, style]} />
-            {error && <Text style={styles.error}>{error}</Text>}
+            <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
+            <TextInput {...props} style={[styles.input, style, { borderColor: colors.border, backgroundColor: colors.background, color: colors.text }]} />
+            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
         </View>
     )
 }
 
 export function ToggleInput({label, error, style, ...props}: InputProps) {
     const [showPassword, setShowPassword] = useState(false);
+    const { colors } = useTheme();
     return (
         <View style={styles.fieldGroup}>
-            <Text style={styles.label}>{label}</Text>
-            <View style={styles.passwordRow}>
+            <Text style={[styles.label, { color: colors.primary }]}>{label}</Text>
+            <View style={[styles.passwordRow, { borderColor: colors.border }]}>
                 <TextInput
                     {...props}
-                    style={[styles.passwordInput, style]}
+                    style={[styles.passwordInput, style, { color: colors.text }]}
                     secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity
@@ -68,7 +72,7 @@ export function ToggleInput({label, error, style, ...props}: InputProps) {
                     }
                 </TouchableOpacity>
             </View>
-            {error && <Text style={styles.error}>{error}</Text>}
+            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
         </View>
     )
 }
@@ -83,12 +87,10 @@ const styles = StyleSheet.create({
     label: {
         fontSize: typography.sizes.sm,
         fontFamily: fonts.regular,
-        marginBottom: 4,
-        color: colors.primary,
+        marginBottom: 4
     },
     input: {
         borderWidth: 1,
-        borderColor: colors.border,
         borderRadius: borderRadius.lg,
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -98,7 +100,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.border,
         borderRadius: borderRadius.lg,
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -113,7 +114,6 @@ const styles = StyleSheet.create({
         marginLeft: 8
     },
     error: {
-        color: colors.error,
         fontSize: typography.sizes.xs,
         marginTop: 4,
     },
@@ -121,25 +121,20 @@ const styles = StyleSheet.create({
     phoneContainer: {
         width: '100%',
         borderWidth: 1,
-        borderColor: colors.border,
         borderRadius: borderRadius.lg,
-        backgroundColor: colors.background,
     },
     phoneTextContainer: {
         borderRadius: borderRadius.lg,
-        backgroundColor: colors.background,
         paddingVertical: 0,
     },
     phoneTextInput: {
         fontFamily: fonts.regular,
         fontSize: typography.sizes.md,
-        color: colors.text,
         height: 42,
     },
     phoneCodeText: {
         fontFamily: fonts.regular,
-        fontSize: typography.sizes.md,
-        color: colors.text,
+        fontSize: typography.sizes.md
     },
     flagHidden: {
         width: 0,

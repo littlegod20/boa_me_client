@@ -1,4 +1,4 @@
-export const colors = {
+export const lightColors = {
     primary: '#0E7E7E',
     primaryLight: '#5BBFBF',
     primaryDark: '#085858',
@@ -12,6 +12,23 @@ export const colors = {
     success: '#2E8C5A',
     warning: '#D97B06',
 }
+
+export const darkColors = {
+    primary: '#5BBFBF',
+    primaryLight: '#0E7E7E',
+    primaryDark: '#085858',
+    secondary: '#E07840',
+    background: '#0F1412',
+    surface: '#1A2220',
+    text: '#F0EDE8',
+    textSecondary: '#9AA8A6',
+    border: '#2A3A38',
+    error: '#F06060',
+    success: '#4CAF7D',
+    warning: '#F0A030',
+}
+
+export type AppColors = typeof lightColors
 
 export const fonts = {
     logo: 'Abres',

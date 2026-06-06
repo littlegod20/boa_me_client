@@ -5,8 +5,13 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "scheme": "boame",
+    "splash": {
+      "image": "./assets/boame_logo.png",
+      "backgroundColor": "#FDFAF6",
+      "resizeMode": "contain"
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -35,7 +40,8 @@
             "./assets/fonts/Montserrat-SemiBold.ttf"
           ]
         }
-      ]
+      ],
+      "expo-splash-screen"
     ],
     "extra": {
       "eas": {
