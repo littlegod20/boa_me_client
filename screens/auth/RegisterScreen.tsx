@@ -143,7 +143,7 @@ export default function RegisterScreen({ navigation }: Props) {
                                 <Text
                                     style={[
                                         {...styles.roleOptionText, color: colors.text},
-                                        selectedRole === value && {color: colors.text},
+                                        selectedRole === value && {color: colors.background},
                                     ]}
                                 >
                                     {label}
