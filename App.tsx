@@ -3,12 +3,18 @@ import RootNavigator from './navigation';
 import { useFonts } from 'expo-font';
 import { fonts } from "./constants/theme";
 import { useEffect } from "react";
-import { ThemeProvider } from "./context/ThemeContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient()
+
+function ThemedStatusBar() {
+  const { isDark } = useTheme();
+  return <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />;
+}
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
@@ -30,6 +36,7 @@ if (!fontsLoaded && !fontError) return null;
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <RootNavigator/>
+        <ThemedStatusBar />
       </ThemeProvider>
     </QueryClientProvider>
   );

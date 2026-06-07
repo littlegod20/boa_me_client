@@ -4,14 +4,28 @@ export type AuthStackParamList = {
     VerifyEmail: {email: string}
 }
 
-export type CustomerStackParamList = {
+export type CustomerTabParamList = {
+    HomeTab: undefined
+    BookingsTab: undefined
+    MessagesTab: undefined
+    ProfileTab: undefined
+}
+
+export type HomeStackParamList = {
     Home: undefined
-    ServiceProviders: {serviceId: string}
+    Services: {categoryId: string, categoryName: string}
+    ServiceProviders: {serviceId: string, serviceName: string}
     BookService: {providerServiceId: string}
+}
+
+export type BookingsStackParamList = {
     MyBookings: undefined
-    BookingDetail: {bookingId: string}
-    Chat: {conversationId: string}
-    Profile: undefined
+    BookingDetail: { bookingId: string }
+}
+
+export type MessagesStackParamList = {
+    Conversations: undefined
+    Chat: { conversationId: string }
 }
 
 export type ProviderStackParamList = {

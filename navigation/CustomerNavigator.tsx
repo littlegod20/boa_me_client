@@ -1,32 +1,60 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, Button } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useAuthStore } from "../store/authStore";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { CustomerTabParamList } from "./types";
+import HomeStackNavigator from "./HomeStackNavigator";
+import BookingsStackNavigator from "./BookingsStackNavigator";
+import MessagesStackNavigator from "./MessagesStackNavigator";
+import ProfileScreen from "../screens/customer/ProfileScreen";
+import { BookMinus, Home, MessageCircle, User } from "lucide-react-native";
+import { useTheme } from "../context/ThemeContext";
+import { fonts } from "../constants/theme";
+
+const Tab = createBottomTabNavigator<CustomerTabParamList>()
 
 export default function CustomerNavigator() {
+    const {colors} = useTheme()
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Customer Home</Text>
-            <Button title="Sign Out" onPress={() => {
-                console.log('Signing out')
-                console.log('Zustand token in customer navigator:', useAuthStore.getState().token)
-                AsyncStorage.clear()
-                useAuthStore.getState().logout()
+        <Tab.Navigator 
+            screenOptions={{
+                headerShown: false,
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.textSecondary,
+                tabBarStyle: {
+                    backgroundColor: colors.background,
+                    borderTopWidth: 1,
+                    borderTopColor: colors.border,
+                    height: 110,
+                    paddingTop: 5,
+                },
+                tabBarLabelStyle: {
+                    fontSize: 12,
+                    fontFamily: fonts.medium,
+                    textAlign: 'center'
+                }
+            }}>
+            <Tab.Screen name='HomeTab' component={HomeStackNavigator} options={{
+                tabBarLabel: 'Home',
+                tabBarIcon: ({color, size}) => (
+                    <Home color={color} size={size} />
+                )
             }} />
-
-        </View>
+            <Tab.Screen name='BookingsTab' component={BookingsStackNavigator} options={{
+                tabBarLabel: 'Bookings',
+                tabBarIcon: ({color, size}) => (
+                    <BookMinus color={color} size={size} />
+                )
+            }} />
+            <Tab.Screen name='MessagesTab' component={MessagesStackNavigator} options={{
+                tabBarLabel: 'Messages',
+                tabBarIcon: ({color, size}) => (
+                    <MessageCircle color={color} size={size} />
+                )
+            }} />
+            <Tab.Screen name='ProfileTab' component={ProfileScreen} options={{
+                tabBarLabel: 'Profile',
+                tabBarIcon: ({color, size}) => (
+                    <User color={color} size={size} />
+                )
+            }} />
+        </Tab.Navigator>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#ffffff',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-});

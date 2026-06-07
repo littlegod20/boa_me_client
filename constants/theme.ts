@@ -1,3 +1,7 @@
+export const layout = {
+    screenPadding: 20
+}
+
 export const lightColors = {
     primary: '#0E7E7E',
     primaryLight: '#5BBFBF',
