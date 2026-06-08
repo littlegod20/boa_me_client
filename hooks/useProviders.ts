@@ -1,0 +1,52 @@
+import { createProviderService, getProviderServiceById, getProviderServices, getServiceProviders, updateProviderService } from "../services/provider.service"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+
+export const useGetServiceProviders = (serviceId: string, page?: number, limit?: number) => {
+    return useQuery({
+        queryKey: ['service-providers', serviceId, page, limit],
+        queryFn: ()=> getServiceProviders(serviceId, page, limit),
+        select: (data) => data.data
+    })
+}
+
+export const useGetProviderServiceById = (providerServiceId: string) => {
+    return useQuery({
+        queryKey: ['provider', providerServiceId],
+        queryFn: ()=> getProviderServiceById(providerServiceId),
+        select: (data) => data.data
+    })
+}
+
+export const useGetProviderServices = ( page?: number, limit?: number) => {
+    return useQuery({
+        queryKey: ['provider-services', page, limit],
+        queryFn: ()=> getProviderServices(page, limit),
+        select: (data) => data.data
+    })
+}
+
+export const useCreateProviderService = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({serviceId, price}: {serviceId: string, price: number}) => createProviderService(serviceId, price),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['provider-services'] })
+        },
+        onError: (error) => {
+            console.log(error)
+        }
+    })
+}
+
+export const useUpdateProviderService = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({providerServiceId, price}: {providerServiceId: string, price: number}) => updateProviderService(providerServiceId, price),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['provider-services'] })
+        },
+        onError: (error) => {
+            console.log(error)
+        }
+    })
+}
