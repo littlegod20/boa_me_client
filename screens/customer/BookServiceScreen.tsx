@@ -1,11 +1,328 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useState } from 'react'
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ActivityIndicator,
+  StyleSheet,
+  Platform,
+  Alert,
+  ScrollView,
+} from 'react-native'
+import { CalendarClock, MapPin, Star } from 'lucide-react-native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { RouteProp } from '@react-navigation/core'
+import { HomeStackParamList } from '../../navigation/types'
+import { useGetProviderServiceById } from '../../hooks/useProviders'
+import { useCreateBooking } from '../../hooks/useBooking'
+import { useTheme } from '../../context/ThemeContext'
+import ScreenContainer from '../../components/shared/ScreenContainer'
+import ScreenHeader from '../../components/shared/ScreenHeader'
+import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
-export default function BookServiceScreen() {
+type BookServiceScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'BookService'>
+type BookServiceScreenRouteProp = RouteProp<HomeStackParamList, 'BookService'>
+
+type Props = {
+  navigation: BookServiceScreenNavigationProp
+  route: BookServiceScreenRouteProp
+}
+
+export default function BookServiceScreen({ navigation, route }: Props) {
+  const { colors } = useTheme()
+  const { providerServiceId } = route.params
+  const { data, isLoading, isError } = useGetProviderServiceById(providerServiceId)
+  const { mutate: createBooking, isPending } = useCreateBooking()
+
+  const [scheduledAt, setScheduledAt] = useState<Date>(new Date())
+  const [location, setLocation] = useState('')
+  const [showPicker, setShowPicker] = useState(false)
+  const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date')
+
+  const onChangeDate = (event: any, selected?: Date) => {
+    if (event.type === 'dismissed') {
+      setShowPicker(false)
+      return
+    }
+    const current = selected ?? scheduledAt
+    if (Platform.OS === 'android') {
+      setShowPicker(false)
+      setScheduledAt(current)
+      if (pickerMode === 'date') {
+        setTimeout(() => {
+          setPickerMode('time')
+          setShowPicker(true)
+        }, 0)
+      }
+    } else {
+      setScheduledAt(current)
+    }
+  }
+
+  const openPicker = () => {
+    setPickerMode('date')
+    setShowPicker(true)
+  }
+
+  const handleBook = () => {
+    if (!location.trim()) {
+      Alert.alert('Location required', 'Please enter where the service should take place.')
+      return
+    }
+    if (scheduledAt.getTime() < Date.now()) {
+      Alert.alert('Invalid time', 'Please choose a date and time in the future.')
+      return
+    }
+
+    createBooking(
+      {
+        provider_service_id: providerServiceId,
+        scheduled_at: scheduledAt,
+        customer_location: location.trim(),
+      },
+      {
+        onSuccess: () => {
+          Alert.alert('Booking created', 'Your booking is awaiting payment.', [
+            { text: 'OK', onPress: () => navigation.goBack() },
+          ])
+        },
+        onError: () => {
+          Alert.alert('Booking failed', 'Something went wrong. Please try again.')
+        },
+      }
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <ScreenContainer>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </ScreenContainer>
+    )
+  }
+
+  if (isError || !data) {
+    return (
+      <ScreenContainer>
+        <ScreenHeader title="Book Service" showBackButton onBack={() => navigation.goBack()} />
+        <View style={styles.centered}>
+          <Text style={[styles.message, { color: colors.error }]}>
+            Could not load this service. Please try again.
+          </Text>
+        </View>
+      </ScreenContainer>
+    )
+  }
+
+  const formattedSchedule = scheduledAt.toLocaleString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
   return (
-    <SafeAreaView>
-      <Text>BookServiceScreen</Text>
-    </SafeAreaView>
+    <ScreenContainer>
+      <ScreenHeader
+        title="Book Service"
+        description="Confirm the details and schedule your booking"
+        showBackButton
+        onBack={() => navigation.goBack()}
+      />
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Service details */}
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={[styles.serviceName, { color: colors.text }]}>{data.service_name}</Text>
+          <Text style={[styles.providerName, { color: colors.textSecondary }]}>
+            by {data.provider_name}
+          </Text>
+
+          <View style={styles.metaRow}>
+            {data.average_rating != null && (
+              <View style={styles.metaItem}>
+                <Star size={16} color={colors.warning} fill={colors.warning} />
+                <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                  {data.average_rating}
+                  {data.review_count != null ? ` (${data.review_count})` : ''}
+                </Text>
+              </View>
+            )}
+            {data.service_area && (
+              <View style={styles.metaItem}>
+                <MapPin size={16} color={colors.textSecondary} />
+                <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                  {data.service_area}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
+            <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Price</Text>
+            <Text style={[styles.price, { color: colors.primary }]}>GHS {data.price}</Text>
+          </View>
+        </View>
+
+        {/* Date & time */}
+        <Text style={[styles.label, { color: colors.text }]}>When</Text>
+        <Pressable
+          onPress={openPicker}
+          style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        >
+          <CalendarClock size={20} color={colors.primary} />
+          <Text style={[styles.fieldText, { color: colors.text }]}>{formattedSchedule}</Text>
+        </Pressable>
+
+        {/* Location */}
+        <Text style={[styles.label, { color: colors.text }]}>Location</Text>
+        <View style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <MapPin size={20} color={colors.primary} />
+          <TextInput
+            value={location}
+            onChangeText={setLocation}
+            placeholder="Enter your address"
+            placeholderTextColor={colors.textSecondary}
+            style={[styles.input, { color: colors.text }]}
+          />
+        </View>
+
+        {showPicker && (
+          <DateTimePicker
+            value={scheduledAt}
+            mode={Platform.OS === 'ios' ? 'datetime' : pickerMode}
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            minimumDate={new Date()}
+            // onChange={onChangeDate}
+          />
+        )}
+      </ScrollView>
+
+      {/* Book & Pay */}
+      <Pressable
+        onPress={handleBook}
+        disabled={isPending}
+        style={[styles.bookButton, { backgroundColor: colors.primary, opacity: isPending ? 0.6 : 1 }]}
+      >
+        {isPending ? (
+          <ActivityIndicator color={colors.background} />
+        ) : (
+          <Text style={[styles.bookButtonText, { color: colors.background }]}>Book & Pay</Text>
+        )}
+      </Pressable>
+    </ScreenContainer>
   )
 }
+
+const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: spacing.lg,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  message: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.regular,
+    textAlign: 'center',
+  },
+  card: {
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    marginBottom: spacing.lg,
+  },
+  serviceName: {
+    fontSize: typography.sizes.lg,
+    fontFamily: fonts.semibold,
+  },
+  providerName: {
+    fontSize: typography.sizes.sm,
+    fontFamily: fonts.regular,
+    marginTop: spacing.xs,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginTop: spacing.sm,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  metaText: {
+    fontSize: typography.sizes.sm,
+    fontFamily: fonts.medium,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+  },
+  priceLabel: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.regular,
+  },
+  price: {
+    fontSize: typography.sizes.lg,
+    fontFamily: fonts.semibold,
+  },
+  label: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.medium,
+    marginBottom: spacing.sm,
+  },
+  field: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  fieldText: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.regular,
+  },
+  input: {
+    flex: 1,
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.regular,
+    padding: 0,
+  },
+  bookButton: {
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  bookButtonText: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.semibold,
+  },
+})
