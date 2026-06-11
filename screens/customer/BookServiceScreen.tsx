@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   ScrollView,
+  KeyboardAvoidingView,
 } from 'react-native'
 import { CalendarClock, MapPin, Star } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -19,8 +20,11 @@ import { useCreateBooking } from '../../hooks/useBooking'
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { borderRadius, fonts, layout, spacing, typography } from '../../constants/theme'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import * as WebBrowser from 'expo-web-browser'
+import { findBookingById } from '../../services/booking.service'
+import { BookingStatus } from '../../types/booking.types'
 
 type BookServiceScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'BookService'>
 type BookServiceScreenRouteProp = RouteProp<HomeStackParamList, 'BookService'>
@@ -34,10 +38,12 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   const { colors } = useTheme()
   const { providerServiceId } = route.params
   const { data, isLoading, isError } = useGetProviderServiceById(providerServiceId)
-  const { mutate: createBooking, isPending } = useCreateBooking()
+  const { mutateAsync: createBooking, isPending } = useCreateBooking()
 
   const [scheduledAt, setScheduledAt] = useState<Date>(new Date())
   const [location, setLocation] = useState('')
+  // const [latitude, setLatitude] = useState<number | undefined>(undefined)
+  // const [longitude, setLongitude] = useState<number | undefined>(undefined)
   const [showPicker, setShowPicker] = useState(false)
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date')
 
@@ -66,7 +72,18 @@ export default function BookServiceScreen({ navigation, route }: Props) {
     setShowPicker(true)
   }
 
-  const handleBook = () => {
+  const verifyBooking = async ({bookingId, attempts=4}: {bookingId:string, attempts?:number}) => {
+    for(let i = 0; i<attempts; i++){
+      const booking = await findBookingById(bookingId)
+      if(booking?.data.booking_status === BookingStatus.PENDING_CONFIRMATION){
+        return true
+      }
+      await new Promise(r=> setTimeout(r,1500))
+    }
+    return false
+  }
+
+  const handleBook = async() => {
     if (!location.trim()) {
       Alert.alert('Location required', 'Please enter where the service should take place.')
       return
@@ -76,23 +93,33 @@ export default function BookServiceScreen({ navigation, route }: Props) {
       return
     }
 
-    createBooking(
-      {
-        provider_service_id: providerServiceId,
-        scheduled_at: scheduledAt,
-        customer_location: location.trim(),
-      },
-      {
-        onSuccess: () => {
-          Alert.alert('Booking created', 'Your booking is awaiting payment.', [
-            { text: 'OK', onPress: () => navigation.goBack() },
-          ])
-        },
-        onError: () => {
-          Alert.alert('Booking failed', 'Something went wrong. Please try again.')
-        },
-      }
-    )
+    try {
+      const bookedResponse = await createBooking(
+        {
+          provider_service_id: providerServiceId,
+          scheduled_at: scheduledAt,
+          customer_location: location.trim(),
+          // customer_latitude: latitude,
+          // customer_longitude: longitude
+        }
+      )
+        const authUrl = bookedResponse.data.authorization_url
+        const bookingId = bookedResponse.data.booking.id
+        await WebBrowser.openAuthSessionAsync(authUrl)
+
+        const confirmed = await verifyBooking(bookingId)
+        if(confirmed){
+          navigation.navigate('Home')
+        } else {
+          Alert.alert('Payment processing', "We'll update your booking shortly.")
+        }
+  
+        
+    } catch (error) {
+      Alert.alert('Booking failed', 'Something went wrong. Please try again.')
+      console.error(error)
+    }
+
   }
 
   if (isLoading) {
@@ -127,7 +154,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   })
 
   return (
-    <ScreenContainer>
+    <KeyboardAvoidingView behavior='padding' style={{backgroundColor: colors.background, flex:1, paddingHorizontal: layout.screenPadding}}>
       <ScreenHeader
         title="Book Service"
         description="Confirm the details and schedule your booking"
@@ -203,7 +230,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
             mode={Platform.OS === 'ios' ? 'datetime' : pickerMode}
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             minimumDate={new Date()}
-            // onChange={onChangeDate}
+            onChange={onChangeDate}
           />
         )}
       </ScrollView>
@@ -220,7 +247,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           <Text style={[styles.bookButtonText, { color: colors.background }]}>Book & Pay</Text>
         )}
       </Pressable>
-    </ScreenContainer>
+    </KeyboardAvoidingView>
   )
 }
 
