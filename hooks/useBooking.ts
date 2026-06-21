@@ -1,6 +1,6 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { createBooking, findBookingById, getBookings } from "../services/booking.service"
-import { CreateBookingInput } from "../types/booking.types"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { changeBookingStatus, createBooking, findBookingById, getBookings } from "../services/booking.service"
+import { BookingStatus, CreateBookingInput } from "../types/booking.types"
 
 
 export const useGetBookings = () => {
@@ -13,7 +13,7 @@ export const useGetBookings = () => {
 
 export const useCreateBooking = () => {
     return useMutation({
-        mutationFn: async (booking: CreateBookingInput) => await createBooking(booking),
+        mutationFn: (booking: CreateBookingInput) => createBooking(booking),
         onSuccess: (data) => {
             console.log(data)
         },
@@ -23,11 +23,25 @@ export const useCreateBooking = () => {
     })
 }
 
-export const useFindBookingById = (bookingId: string) => {
+export const useGetBookingById = (bookingId: string) => {
     return useQuery({
         queryKey: ['booking', bookingId],
         queryFn: () => findBookingById(bookingId),
         select: (data) => data.data,
         enabled: !!bookingId
+    })
+}
+
+export const useChangeBookingStatus = ()=>{
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({bookingId, booking_status}:{bookingId:string, booking_status:BookingStatus}) => changeBookingStatus(bookingId, booking_status),
+        onSuccess: ()=>{
+            queryClient.invalidateQueries({queryKey: ['bookings']})
+            queryClient.invalidateQueries({queryKey: ['booking']})
+        },
+        onError: (error) =>{
+            console.log(error)
+        }
     })
 }

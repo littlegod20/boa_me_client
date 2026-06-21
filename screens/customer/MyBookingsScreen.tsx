@@ -1,0 +1,92 @@
+import { View, Text, ActivityIndicator, FlatList, StyleSheet } from 'react-native'
+import ScreenContainer from '../../components/shared/ScreenContainer'
+import ScreenHeader from '../../components/shared/ScreenHeader'
+import { BookingsStackParamList } from '../../navigation/types'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { useTheme } from '../../context/ThemeContext'
+import { useGetBookings } from '../../hooks/useBooking'
+import { fonts, spacing, typography } from '../../constants/theme'
+import { BookingCard } from '../../components/shared/BookingCard'
+
+type MyBookingsScreenNavigationProp = StackNavigationProp<BookingsStackParamList, 'MyBookings'>
+
+type Props = {
+    navigation: MyBookingsScreenNavigationProp
+}
+
+
+export default function MyBookingsScreen({navigation}: Props) {
+    const {colors} = useTheme()
+    const {data:bookings, isLoading, isError} = useGetBookings()
+
+  return (
+    <ScreenContainer>
+        <ScreenHeader
+        title='My Bookings'
+        description='Track and manage your service bookings'
+        />
+
+        { isLoading ? (
+            <View style={styles.centered}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        ) : isError ? (
+            <View style={styles.centered}>
+            <Text style={[styles.message, { color: colors.error }]}>
+                Something went wrong while fetching your bookings
+            </Text>
+            </View>
+        ) : (
+            <FlatList
+            data={bookings}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+                <BookingCard
+                service_name={item.service_name}
+                provider_name={item.provider_name}
+                price={item.price}
+                scheduled_at={item.scheduled_at}
+                customer_location={item.customer_location}
+                booking_status={item.booking_status}
+                showChevron
+                onPress={() => navigation.navigate('BookingDetail', {
+                    bookingId: item.id,
+                })}
+                />
+            )}
+            ListEmptyComponent={
+                <View style={styles.centered}>
+                <Text style={[styles.message, { color: colors.textSecondary }]}>
+                    You haven't booked any services yet
+                </Text>
+                </View>
+            }
+            keyExtractor={(item) => item.id}
+            />
+        )}
+    </ScreenContainer>
+  )
+}
+
+const styles = StyleSheet.create({
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      flexGrow: 1,
+      paddingBottom: spacing.xl,
+    },
+    centered: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.lg,
+    },
+    message: {
+      fontSize: typography.sizes.md,
+      fontFamily: fonts.regular,
+      textAlign: 'center',
+    },
+  })

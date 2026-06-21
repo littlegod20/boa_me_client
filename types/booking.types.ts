@@ -1,3 +1,5 @@
+import { PressableProps, StyleProp, ViewStyle } from "react-native"
+
 export enum BookingStatus {
     PENDING_PAYMENT = 'pending_payment',
     PENDING_CONFIRMATION = 'pending_confirmation',
@@ -13,6 +15,9 @@ export interface Booking {
     provider_service_id: string
     scheduled_at: string
     booking_status: BookingStatus
+    service_name: string
+    provider_name: string
+    price: number
     customer_location: string
     customer_latitude?: number
     customer_longitude?: number
@@ -26,4 +31,16 @@ export type CreateBookingInput = {
     customer_location: string
     customer_latitude?: number
     customer_longitude?: number
+}
+
+export type BookingCardTypes = {
+    service_name?: string
+    provider_name?: string
+    price?: number
+    scheduled_at: string
+    customer_location: string
+    booking_status: BookingStatus
+    showChevron?: boolean
+    onPress?: () => void
+    style?: StyleProp<ViewStyle>
 }

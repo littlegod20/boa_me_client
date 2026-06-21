@@ -1,4 +1,4 @@
-import { CreateBookingInput } from "../types/booking.types"
+import { BookingStatus, CreateBookingInput } from "../types/booking.types"
 import api from "./api"
 
 
@@ -14,5 +14,10 @@ export const createBooking = async (booking: CreateBookingInput) => {
 
 export const findBookingById = async (bookingId: string) => {
     const response = await api.get(`/bookings/${bookingId}`)
+    return response.data
+}
+
+export const changeBookingStatus = async (bookingId:string, booking_status:BookingStatus) =>{
+    const response = await api.patch(`/bookings/${bookingId}/status`, {booking_status})
     return response.data
 }

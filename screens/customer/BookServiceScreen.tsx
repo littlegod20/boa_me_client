@@ -103,23 +103,24 @@ export default function BookServiceScreen({ navigation, route }: Props) {
           // customer_longitude: longitude
         }
       )
-        const authUrl = bookedResponse.data.authorization_url
-        const bookingId = bookedResponse.data.booking.id
-        await WebBrowser.openAuthSessionAsync(authUrl)
+      
+      const authUrl = bookedResponse.data.authorization_url
+      await WebBrowser.openAuthSessionAsync(authUrl)
+      
+      // TODO: Show a loading page after webview before moving home
+      const bookingId = bookedResponse.data.booking.id
 
-        const confirmed = await verifyBooking(bookingId)
-        if(confirmed){
-          navigation.navigate('Home')
-        } else {
-          Alert.alert('Payment processing', "We'll update your booking shortly.")
-        }
-  
-        
+      const confirmed = await verifyBooking({bookingId})
+
+      if(confirmed){
+        navigation.navigate('Home')
+      } else {
+        Alert.alert('Payment processing', "We'll update your booking shortly.")
+      }
     } catch (error) {
       Alert.alert('Booking failed', 'Something went wrong. Please try again.')
       console.error(error)
     }
-
   }
 
   if (isLoading) {
@@ -154,99 +155,101 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   })
 
   return (
-    <KeyboardAvoidingView behavior='padding' style={{backgroundColor: colors.background, flex:1, paddingHorizontal: layout.screenPadding}}>
-      <ScreenHeader
-        title="Book Service"
-        description="Confirm the details and schedule your booking"
-        showBackButton
-        onBack={() => navigation.goBack()}
-      />
+    <KeyboardAvoidingView behavior='padding' style={{backgroundColor: colors.background, flex:1}}>
+      <View style={styles.content}>
+        <ScreenHeader
+          title="Book Service"
+          description="Confirm the details and schedule your booking"
+          showBackButton
+          onBack={() => navigation.goBack()}
+        />
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Service details */}
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.serviceName, { color: colors.text }]}>{data.service_name}</Text>
-          <Text style={[styles.providerName, { color: colors.textSecondary }]}>
-            by {data.provider_name}
-          </Text>
-
-          <View style={styles.metaRow}>
-            {data.average_rating != null && (
-              <View style={styles.metaItem}>
-                <Star size={16} color={colors.warning} fill={colors.warning} />
-                <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                  {data.average_rating}
-                  {data.review_count != null ? ` (${data.review_count})` : ''}
-                </Text>
-              </View>
-            )}
-            {data.service_area && (
-              <View style={styles.metaItem}>
-                <MapPin size={16} color={colors.textSecondary} />
-                <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                  {data.service_area}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
-            <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Price</Text>
-            <Text style={[styles.price, { color: colors.primary }]}>GHS {data.price}</Text>
-          </View>
-        </View>
-
-        {/* Date & time */}
-        <Text style={[styles.label, { color: colors.text }]}>When</Text>
-        <Pressable
-          onPress={openPicker}
-          style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <CalendarClock size={20} color={colors.primary} />
-          <Text style={[styles.fieldText, { color: colors.text }]}>{formattedSchedule}</Text>
+          {/* Service details */}
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.serviceName, { color: colors.text }]}>{data.service_name}</Text>
+            <Text style={[styles.providerName, { color: colors.textSecondary }]}>
+              by {data.provider_name}
+            </Text>
+
+            <View style={styles.metaRow}>
+              {data.average_rating != null && (
+                <View style={styles.metaItem}>
+                  <Star size={16} color={colors.warning} fill={colors.warning} />
+                  <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                    {data.average_rating}
+                    {data.review_count != null ? ` (${data.review_count})` : ''}
+                  </Text>
+                </View>
+              )}
+              {data.service_area && (
+                <View style={styles.metaItem}>
+                  <MapPin size={16} color={colors.textSecondary} />
+                  <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                    {data.service_area}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View style={[styles.priceRow, { borderTopColor: colors.border }]}>
+              <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Price</Text>
+              <Text style={[styles.price, { color: colors.primary }]}>GHS {data.price}</Text>
+            </View>
+          </View>
+
+          {/* Date & time */}
+          <Text style={[styles.label, { color: colors.text }]}>When</Text>
+          <Pressable
+            onPress={openPicker}
+            style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            <CalendarClock size={20} color={colors.primary} />
+            <Text style={[styles.fieldText, { color: colors.text }]}>{formattedSchedule}</Text>
+          </Pressable>
+
+          {/* Location */}
+          <Text style={[styles.label, { color: colors.text }]}>Location</Text>
+          <View style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <MapPin size={20} color={colors.primary} />
+            <TextInput
+              value={location}
+              onChangeText={setLocation}
+              placeholder="Enter your address"
+              placeholderTextColor={colors.textSecondary}
+              style={[styles.input, { color: colors.text }]}
+            />
+          </View>
+
+          {showPicker && (
+            <DateTimePicker
+              value={scheduledAt}
+              mode={Platform.OS === 'ios' ? 'datetime' : pickerMode}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              minimumDate={new Date()}
+              onChange={onChangeDate}
+            />
+          )}
+        </ScrollView>
+
+        {/* Book & Pay */}
+        <Pressable
+          onPress={handleBook}
+          disabled={isPending}
+          style={[styles.bookButton, { backgroundColor: colors.primary, opacity: isPending ? 0.6 : 1 }]}
+        >
+          {isPending ? (
+            <ActivityIndicator color={colors.background} />
+          ) : (
+            <Text style={[styles.bookButtonText, { color: colors.background }]}>Book & Pay</Text>
+          )}
         </Pressable>
-
-        {/* Location */}
-        <Text style={[styles.label, { color: colors.text }]}>Location</Text>
-        <View style={[styles.field, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <MapPin size={20} color={colors.primary} />
-          <TextInput
-            value={location}
-            onChangeText={setLocation}
-            placeholder="Enter your address"
-            placeholderTextColor={colors.textSecondary}
-            style={[styles.input, { color: colors.text }]}
-          />
-        </View>
-
-        {showPicker && (
-          <DateTimePicker
-            value={scheduledAt}
-            mode={Platform.OS === 'ios' ? 'datetime' : pickerMode}
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            minimumDate={new Date()}
-            onChange={onChangeDate}
-          />
-        )}
-      </ScrollView>
-
-      {/* Book & Pay */}
-      <Pressable
-        onPress={handleBook}
-        disabled={isPending}
-        style={[styles.bookButton, { backgroundColor: colors.primary, opacity: isPending ? 0.6 : 1 }]}
-      >
-        {isPending ? (
-          <ActivityIndicator color={colors.background} />
-        ) : (
-          <Text style={[styles.bookButtonText, { color: colors.background }]}>Book & Pay</Text>
-        )}
-      </Pressable>
+      </View>
     </KeyboardAvoidingView>
   )
 }
@@ -255,6 +258,7 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
+  content: { paddingHorizontal: layout.screenPadding , flex:1, paddingTop:20},
   scrollContent: {
     paddingBottom: spacing.lg,
   },
