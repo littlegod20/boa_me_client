@@ -1,14 +1,14 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
-import { LogOut } from 'lucide-react-native'
+import { ChevronRight, LogOut, Store } from 'lucide-react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { CustomerTabParamList } from '../../navigation/types'
+import { CustomerTabParamList, ProfileStackParamList } from '../../navigation/types'
 import { useAuthStore } from '../../store/authStore'
 import { useTheme } from '../../context/ThemeContext'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 
-type ProfileScreenNavigationProps = StackNavigationProp<CustomerTabParamList, 'ProfileTab'>
+type ProfileScreenNavigationProps = StackNavigationProp<ProfileStackParamList, 'Profile'>
 
 type Props = {
   navigation: ProfileScreenNavigationProps
@@ -49,6 +49,28 @@ export default function ProfileScreen({ navigation }: Props) {
           </View>
         )}
       </View>
+
+      {user?.role !== 'provider' && (
+        <Pressable
+          onPress={() => navigation.navigate('BecomeAProvider')}
+          style={({ pressed }) => [
+            styles.actionRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && styles.pressed,
+          ]}
+        >
+          <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
+            <Store size={20} color={colors.primary} />
+          </View>
+          <View style={styles.actionTextWrapper}>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>Become a Provider</Text>
+            <Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>
+              Offer your services and start earning
+            </Text>
+          </View>
+          <ChevronRight size={20} color={colors.textSecondary} />
+        </Pressable>
+      )}
 
       <View style={styles.spacer} />
 
@@ -104,6 +126,34 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     fontFamily: fonts.medium,
     textTransform: 'capitalize',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderWidth: 1,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginTop: spacing.xl,
+  },
+  actionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionTextWrapper: {
+    flex: 1,
+  },
+  actionTitle: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.semibold,
+  },
+  actionSubtitle: {
+    fontSize: typography.sizes.sm,
+    fontFamily: fonts.regular,
+    marginTop: spacing.xs,
   },
   spacer: {
     flex: 1,

@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react'
 import {createStackNavigator} from '@react-navigation/stack'
 import {NavigationContainer} from '@react-navigation/native'
 import {useAuthStore} from '../store/authStore'
@@ -34,8 +33,8 @@ const linking: LinkingOptions<RootParamList> = {
 const Stack = createStackNavigator<RootParamList>()
 
 export default function RootNavigator () {
-    const {token, user} = useAuthStore()
-    
+    const {token, user, logout} = useAuthStore()
+
     return (
     <NavigationContainer linking={linking}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>

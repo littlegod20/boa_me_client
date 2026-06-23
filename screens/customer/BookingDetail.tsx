@@ -71,8 +71,8 @@ const BookingDetail = ({ navigation, route }: Props) => {
     }
 
     const canCancel = cancellableStatuses.includes(data.booking_status)
-
-    const canReview = data.booking_status === BookingStatus.COMPLETED
+    const canReview = data.booking_status === BookingStatus.COMPLETED && !data.review_id
+    const hasReview = data.booking_status === BookingStatus.COMPLETED && !!data.review_id
 
     const handleCancel = () => {
         Alert.alert(
@@ -147,7 +147,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                     {/* Action Buttons */}
                     <View style={styles.actionContainer}>
                         {
-                            canCancel ? (
+                            canCancel && (
                                 <>
                                     <BoameBtn 
                                     title={`${isPending ? "Canceling..." : "Cancel"}`} 
@@ -165,18 +165,39 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     />
 
                                 </>
-                            ) : canReview && (
+                            ) 
+                        }
+                        { 
+                            canReview && (
                                 <>
                                     <BoameBtn 
                                     title='Review' 
                                     variant='outline'
-                                    onPress={()=>console.log('review')}
+                                    onPress={() => navigation.navigate('ReviewBooking', {
+                                        bookingId,
+                                        serviceName: data.service_name,
+                                        providerName: data.provider_name,
+                                    })}
+                                    fullWidth={false}
                                     />
                                     <BoameBtn 
                                     title='Message' 
                                     variant='outline'
                                     onPress={()=>console.log('message')}
                                     fullWidth={false}
+                                    />
+                                </>
+                            ) 
+                        }
+                        {
+                            hasReview && (
+                                <>
+                                    <BoameBtn 
+                                    title='View Review' 
+                                    variant='outline'
+                                    onPress={() => navigation.navigate('ReviewDetail', {
+                                        reviewId: data.review_id!,
+                                    })}
                                     />
                                 </>
                             )

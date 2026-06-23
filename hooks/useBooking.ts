@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { changeBookingStatus, createBooking, findBookingById, getBookings } from "../services/booking.service"
-import { BookingStatus, CreateBookingInput } from "../types/booking.types"
+import { Booking, BookingStatus, CreateBookingInput } from "../types/booking.types"
 
 
 export const useGetBookings = () => {
@@ -27,7 +27,7 @@ export const useGetBookingById = (bookingId: string) => {
     return useQuery({
         queryKey: ['booking', bookingId],
         queryFn: () => findBookingById(bookingId),
-        select: (data) => data.data,
+        select: (data) => data.data as Booking,
         enabled: !!bookingId
     })
 }

@@ -3,3 +3,18 @@ export enum Role {
     PROVIDER = 'provider',
     ADMIN = 'admin',
 }
+
+export type User = {
+    id: string
+    name: string
+    email: string
+    role: 'customer' | 'provider' | 'admin'
+}
+
+
+export type AuthStore = {
+    token: string | null
+    user: User | null
+    setAuth: (token: string, user: User) => void
+    logout: () => void
+}

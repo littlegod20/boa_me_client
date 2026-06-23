@@ -3,10 +3,10 @@ import { CustomerTabParamList } from "./types";
 import HomeStackNavigator from "./HomeStackNavigator";
 import BookingsStackNavigator from "./BookingsStackNavigator";
 import MessagesStackNavigator from "./MessagesStackNavigator";
-import ProfileScreen from "../screens/customer/ProfileScreen";
 import { BookMinus, Home, MessageCircle, User } from "lucide-react-native";
 import { useTheme } from "../context/ThemeContext";
 import { fonts } from "../constants/theme";
+import { ProfileStackNavigator } from "./ProfileStackNavigator";
 
 const Tab = createBottomTabNavigator<CustomerTabParamList>()
 
@@ -49,7 +49,7 @@ export default function CustomerNavigator() {
                     <MessageCircle color={color} size={size} />
                 )
             }} />
-            <Tab.Screen name='ProfileTab' component={ProfileScreen} options={{
+            <Tab.Screen name='ProfileTab' component={ProfileStackNavigator} options={{
                 tabBarLabel: 'Profile',
                 tabBarIcon: ({color, size}) => (
                     <User color={color} size={size} />

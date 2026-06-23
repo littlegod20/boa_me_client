@@ -1,5 +1,8 @@
-import { createProviderService, getProviderServiceById, getProviderServices, getServiceProviders, updateProviderService } from "../services/provider.service"
+import { createProviderService, getProviderServiceById, getProviderServices, getServiceProviders, registerAsProvider, updateProviderService } from "../services/provider.service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useAuthStore } from "../store/authStore"
+import { CreateProvider } from "../types/provider.types"
+import { parseJwtPayload } from "../utils/jwt"
 
 export const useGetServiceProviders = (serviceId: string, page?: number, limit?: number) => {
     return useQuery({
@@ -48,5 +51,18 @@ export const useUpdateProviderService = () => {
         onError: (error) => {
             console.log(error)
         }
+    })
+}
+
+// useProviders.ts
+export const useRegisterAsProvider = () => {
+    const setAuth = useAuthStore((state) => state.setAuth)
+    return useMutation({
+        mutationFn: (data: CreateProvider) => registerAsProvider(data),
+        onSuccess: (response) => {
+            const token = response.token
+            const user = parseJwtPayload(token)
+            setAuth(token, user)
+        },
     })
 }

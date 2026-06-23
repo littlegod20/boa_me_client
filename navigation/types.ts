@@ -21,6 +21,13 @@ export type HomeStackParamList = {
 export type BookingsStackParamList = {
     MyBookings: undefined
     BookingDetail: { bookingId: string }
+    ReviewBooking: {bookingId: string, serviceName?: string, providerName?: string}
+    ReviewDetail: { reviewId: string }
+}
+
+export type ProfileStackParamList = {
+    Profile:undefined
+    BecomeAProvider:undefined
 }
 
 export type MessagesStackParamList = {

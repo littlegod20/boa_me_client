@@ -18,6 +18,7 @@ export interface Booking {
     service_name: string
     provider_name: string
     price: number
+    review_id:string
     customer_location: string
     customer_latitude?: number
     customer_longitude?: number

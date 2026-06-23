@@ -1,11 +1,6 @@
-type JwtPayload = {
-    id: string
-    name?: string
-    email?: string
-    role: 'customer' | 'provider' | 'admin'
-}
+import { User } from "../types/auth.types"
 
-export function parseJwtPayload(token: string): JwtPayload {
+export function parseJwtPayload(token: string): User {
     const base64Url = token.split('.')[1]
     if (!base64Url) {
         throw new Error('Invalid token')
@@ -19,5 +14,5 @@ export function parseJwtPayload(token: string): JwtPayload {
             .join('')
     )
 
-    return JSON.parse(jsonPayload) as JwtPayload
+    return JSON.parse(jsonPayload)
 }

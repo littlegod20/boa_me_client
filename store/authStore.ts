@@ -1,21 +1,9 @@
 import {create} from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
-type User = {
-    id: string
-    name: string
-    email: string
-    role: 'customer' | 'provider' | 'admin'
-}
+import { AuthStore } from '../types/auth.types'
 
 
-type AuthStore = {
-    token: string | null
-    user: User | null
-    setAuth: (token: string, user: User) => void
-    logout: () => void
-}
 
 export const useAuthStore = create<AuthStore>()(
     persist(
