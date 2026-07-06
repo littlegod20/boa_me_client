@@ -1,7 +1,7 @@
-import { createProviderService, getProviderServiceById, getProviderServices, getServiceProviders, registerAsProvider, updateProviderService } from "../services/provider.service"
+import { createProviderService, deleteProviderService, getProviderServiceById, getProviderServices, getServiceProviders, registerAsProvider, updateProviderService } from "../services/provider.service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../store/authStore"
-import { CreateProvider } from "../types/provider.types"
+import { CreateProvider, ProviderServiceDetailed } from "../types/provider.types"
 import { parseJwtPayload } from "../utils/jwt"
 
 export const useGetServiceProviders = (serviceId: string, page?: number, limit?: number) => {
@@ -24,7 +24,7 @@ export const useGetProviderServices = ( page?: number, limit?: number) => {
     return useQuery({
         queryKey: ['provider-services', page, limit],
         queryFn: ()=> getProviderServices(page, limit),
-        select: (data) => data.data
+        select: (data) => data.data as ProviderServiceDetailed[]
     })
 }
 
@@ -45,6 +45,19 @@ export const useUpdateProviderService = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: ({providerServiceId, price}: {providerServiceId: string, price: number}) => updateProviderService(providerServiceId, price),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['provider-services'] })
+        },
+        onError: (error) => {
+            console.log(error)
+        }
+    })
+}
+
+export const useDeleteProviderService = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (providerServiceId: string) => deleteProviderService(providerServiceId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['provider-services'] })
         },

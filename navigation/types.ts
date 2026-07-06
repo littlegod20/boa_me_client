@@ -46,3 +46,9 @@ export type ProviderBookingsStackParamList = {
     ProviderBookings: undefined
     ProviderBookingDetail: { bookingId: string }
 }
+
+export type ProviderServicesStackParamList = {
+    MyServices: undefined
+    AddService: undefined
+    EditService: { providerServiceId: string, serviceName?: string, price?: number }
+}

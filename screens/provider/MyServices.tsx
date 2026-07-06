@@ -1,17 +1,178 @@
-import { View, Text } from 'react-native'
-import { StackNavigationProp } from "@react-navigation/stack";
-import { ProviderTabParamList } from '../../navigation/types';
+import { View, Text, ActivityIndicator, FlatList, StyleSheet, Pressable, Alert } from 'react-native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { Plus, Pencil, Trash2 } from 'lucide-react-native'
+import { ProviderServicesStackParamList } from '../../navigation/types'
+import { useTheme } from '../../context/ThemeContext'
+import { useGetProviderServices, useDeleteProviderService } from '../../hooks/useProviders'
+import ScreenContainer from '../../components/shared/ScreenContainer'
+import ScreenHeader from '../../components/shared/ScreenHeader'
+import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import { ProviderServiceDetailed } from '../../types/provider.types'
 
-type ProviderNavigatorProps = StackNavigationProp<ProviderTabParamList, 'ServicesTab'> 
+type MyServicesNavigationProp = StackNavigationProp<ProviderServicesStackParamList, 'MyServices'>
 
-type Prop = {
-    navigation:ProviderNavigatorProps
+type Props = {
+    navigation: MyServicesNavigationProp
 }
 
-export default function MyServices({navigation}:Prop) {
-  return (
-    <View>
-      <Text>MyServices</Text>
-    </View>
-  )
+export default function MyServices({ navigation }: Props) {
+    const { colors } = useTheme()
+    const { data: services, isLoading, isError } = useGetProviderServices()
+    const { mutate: deleteService, isPending: isDeleting } = useDeleteProviderService()
+
+    const handleDelete = (item: ProviderServiceDetailed) => {
+        Alert.alert(
+            'Remove service?',
+            `"${item.service_name}" will no longer be available for customers to book.`,
+            [
+                { text: 'Keep', style: 'cancel' },
+                { text: 'Remove', style: 'destructive', onPress: () => deleteService(item.id) },
+            ]
+        )
+    }
+
+    return (
+        <ScreenContainer>
+            <View style={styles.headerRow}>
+                <View style={styles.headerText}>
+                    <ScreenHeader
+                        title='My Services'
+                        description='Manage the services you offer and their prices'
+                    />
+                </View>
+                <Pressable
+                    onPress={() => navigation.navigate('AddService')}
+                    style={[styles.addButton, { backgroundColor: colors.primary }]}
+                    accessibilityRole='button'
+                    accessibilityLabel='Add service'
+                >
+                    <Plus size={22} color={colors.background} />
+                </Pressable>
+            </View>
+
+            {isLoading ? (
+                <View style={styles.centered}>
+                    <ActivityIndicator size='large' color={colors.primary} />
+                </View>
+            ) : isError ? (
+                <View style={styles.centered}>
+                    <Text style={[styles.message, { color: colors.error }]}>
+                        Something went wrong while fetching your services
+                    </Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={services}
+                    style={styles.list}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item }) => (
+                        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                            <View style={styles.cardContent}>
+                                <Text style={[styles.serviceName, { color: colors.text }]} numberOfLines={1}>
+                                    {item.service_name}
+                                </Text>
+                                <Text style={[styles.price, { color: colors.primary }]}>GHS {item.price}</Text>
+                            </View>
+                            <View style={styles.actions}>
+                                <Pressable
+                                    onPress={() => navigation.navigate('EditService', {
+                                        providerServiceId: item.id,
+                                        serviceName: item.service_name,
+                                        price: item.price,
+                                    })}
+                                    style={styles.iconButton}
+                                    accessibilityRole='button'
+                                    accessibilityLabel='Edit price'
+                                >
+                                    <Pencil size={18} color={colors.textSecondary} />
+                                </Pressable>
+                                <Pressable
+                                    onPress={() => handleDelete(item)}
+                                    disabled={isDeleting}
+                                    style={styles.iconButton}
+                                    accessibilityRole='button'
+                                    accessibilityLabel='Remove service'
+                                >
+                                    <Trash2 size={18} color={colors.error} />
+                                </Pressable>
+                            </View>
+                        </View>
+                    )}
+                    ListEmptyComponent={
+                        <View style={styles.centered}>
+                            <Text style={[styles.message, { color: colors.textSecondary }]}>
+                                You haven't added any services yet. Tap + to add one.
+                            </Text>
+                        </View>
+                    }
+                    keyExtractor={(item) => item.id}
+                />
+            )}
+        </ScreenContainer>
+    )
 }
+
+const styles = StyleSheet.create({
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.md,
+    },
+    headerText: {
+        flex: 1,
+    },
+    addButton: {
+        width: 44,
+        height: 44,
+        borderRadius: borderRadius.full,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    list: {
+        flex: 1,
+    },
+    listContent: {
+        flexGrow: 1,
+        paddingBottom: spacing.xl,
+    },
+    card: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: spacing.md,
+        borderRadius: borderRadius.lg,
+        borderWidth: 1,
+        marginBottom: spacing.sm,
+    },
+    cardContent: {
+        flex: 1,
+        gap: spacing.xs,
+    },
+    serviceName: {
+        fontSize: typography.sizes.lg,
+        fontFamily: fonts.semibold,
+    },
+    price: {
+        fontSize: typography.sizes.md,
+        fontFamily: fonts.medium,
+    },
+    actions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.xs,
+    },
+    iconButton: {
+        padding: spacing.sm,
+    },
+    centered: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: spacing.lg,
+    },
+    message: {
+        fontSize: typography.sizes.md,
+        fontFamily: fonts.regular,
+        textAlign: 'center',
+    },
+})

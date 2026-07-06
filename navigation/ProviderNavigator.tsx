@@ -6,7 +6,7 @@ import ProviderBookingsStackNavigator from "./ProviderBookingsStackNavigator";
 import { ProviderTabParamList } from "./types";
 import { ProfileStackNavigator } from "./ProfileStackNavigator";
 import Earnings from "../screens/provider/Earnings";
-import MyServices from "../screens/provider/MyServices";
+import ProviderServicesStackNavigator from "./ProviderServicesStackNavigator";
 
 const Tab = createBottomTabNavigator<ProviderTabParamList>()
 
@@ -39,7 +39,7 @@ export default function ProviderNavigator() {
                 )
             }}/>
 
-             <Tab.Screen name="ServicesTab" component={MyServices} options={{
+             <Tab.Screen name="ServicesTab" component={ProviderServicesStackNavigator} options={{
                 tabBarLabel:'Services',
                 tabBarIcon:({color, size})=>(
                     <Wrench color={color} size={size} />

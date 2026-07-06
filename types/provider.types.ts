@@ -45,6 +45,11 @@ export interface ProviderService {
     updated_at?: string
 }
 
+export interface ProviderServiceDetailed extends ProviderService {
+    service_name: string
+    service_description?: string
+}
+
 export type CreateProviderService = {
     provider_id: string
     service_id: string
