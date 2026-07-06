@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native'
 import { fonts, spacing, typography } from '../../constants/theme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
@@ -5,6 +6,8 @@ import ScreenHeader from '../../components/shared/ScreenHeader'
 import { useTheme } from '../../context/ThemeContext'
 import { useGetProviderBookings } from '../../hooks/useBooking'
 import { BookingCard } from '../../components/shared/BookingCard'
+import BookingStatusFilter from '../../components/shared/BookingStatusFilter'
+import { BookingStatus } from '../../types/booking.types'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { ProviderBookingsStackParamList } from '../../navigation/types'
 
@@ -16,7 +19,8 @@ type Props = {
 
 export default function ProviderBookingsScreen({navigation}:Props) {
     const {colors} = useTheme()
-    const {data:bookings, isLoading, isError} = useGetProviderBookings()
+    const [statusFilter, setStatusFilter] = useState<BookingStatus | undefined>(undefined)
+    const {data:bookings, isLoading, isError} = useGetProviderBookings(statusFilter)
 
     return (
         <ScreenContainer>
@@ -24,7 +28,9 @@ export default function ProviderBookingsScreen({navigation}:Props) {
             title='Customer Bookings'
             description='Track and manage your customer bookings'
             />
-    
+
+            <BookingStatusFilter selected={statusFilter} onSelect={setStatusFilter} />
+
             { isLoading ? (
                 <View style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
@@ -60,7 +66,7 @@ export default function ProviderBookingsScreen({navigation}:Props) {
                 ListEmptyComponent={
                     <View style={styles.centered}>
                     <Text style={[styles.message, { color: colors.textSecondary }]}>
-                        No bookings from customers yet.
+                        {statusFilter ? 'No bookings match this filter' : 'No bookings from customers yet.'}
                     </Text>
                     </View>
                 }

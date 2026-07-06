@@ -2,8 +2,13 @@ import { BookingStatus, CreateBookingInput } from "../types/booking.types"
 import api from "./api"
 
 
-export const getBookings = async (as?:'provider') => {
-    const response = await api.get('/bookings', {params: as? {as}:{}})
+type GetBookingsParams = {
+    as?: 'provider'
+    status?: BookingStatus
+}
+
+export const getBookings = async (params: GetBookingsParams = {}) => {
+    const response = await api.get('/bookings', { params })
     return response.data
 }
 

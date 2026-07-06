@@ -3,18 +3,18 @@ import { changeBookingStatus, createBooking, findBookingById, getBookings } from
 import { Booking, BookingStatus, CreateBookingInput } from "../types/booking.types"
 
 
-export const useGetBookings = () => {
+export const useGetBookings = (status?: BookingStatus) => {
     return useQuery({
-        queryKey: ['bookings'],
-        queryFn: () => getBookings(),
+        queryKey: ['bookings', 'customer', status ?? 'all'],
+        queryFn: () => getBookings({ status }),
         select: (data) => data.data
     })
 }
 
-export const useGetProviderBookings = () => {
+export const useGetProviderBookings = (status?: BookingStatus) => {
     return useQuery({
-        queryKey: ['bookings', 'provider'],
-        queryFn: () => getBookings('provider'),
+        queryKey: ['bookings', 'provider', status ?? 'all'],
+        queryFn: () => getBookings({ as: 'provider', status }),
         select: (data) => data.data
     })
 }

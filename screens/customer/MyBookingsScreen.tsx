@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { View, Text, ActivityIndicator, FlatList, StyleSheet } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
@@ -7,6 +8,8 @@ import { useTheme } from '../../context/ThemeContext'
 import { useGetBookings } from '../../hooks/useBooking'
 import { fonts, spacing, typography } from '../../constants/theme'
 import { BookingCard } from '../../components/shared/BookingCard'
+import BookingStatusFilter from '../../components/shared/BookingStatusFilter'
+import { BookingStatus } from '../../types/booking.types'
 
 type MyBookingsScreenNavigationProp = StackNavigationProp<BookingsStackParamList, 'MyBookings'>
 
@@ -17,7 +20,8 @@ type Props = {
 
 export default function MyBookingsScreen({navigation}: Props) {
     const {colors} = useTheme()
-    const {data:bookings, isLoading, isError} = useGetBookings()
+    const [statusFilter, setStatusFilter] = useState<BookingStatus | undefined>(undefined)
+    const {data:bookings, isLoading, isError} = useGetBookings(statusFilter)
 
   return (
     <ScreenContainer>
@@ -25,6 +29,8 @@ export default function MyBookingsScreen({navigation}: Props) {
         title='My Bookings'
         description='Track and manage your service bookings'
         />
+
+        <BookingStatusFilter selected={statusFilter} onSelect={setStatusFilter} />
 
         { isLoading ? (
             <View style={styles.centered}>
@@ -59,7 +65,7 @@ export default function MyBookingsScreen({navigation}: Props) {
             ListEmptyComponent={
                 <View style={styles.centered}>
                 <Text style={[styles.message, { color: colors.textSecondary }]}>
-                    You haven't booked any services yet
+                    {statusFilter ? 'No bookings match this filter' : "You haven't booked any services yet"}
                 </Text>
                 </View>
             }
