@@ -6,6 +6,7 @@ import ProviderNavigator from './ProviderNavigator'
 import CustomerNavigator from './CustomerNavigator'
 import * as Linking from 'expo-linking'
 import { LinkingOptions } from '@react-navigation/native'
+import { useEffect } from 'react'
 
 type RootParamList = {
     Auth: undefined,

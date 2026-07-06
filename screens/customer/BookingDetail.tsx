@@ -12,6 +12,7 @@ import { CalendarClock, Hash, MapPin, Clock, User } from 'lucide-react-native'
 import { DetailRow } from '../../components/shared/DetailRow'
 import BoameBtn from '../../components/shared/BoameBtn'
 import { BookingStatus } from '../../types/booking.types'
+import { formatDateTime } from '../../utils/formatDate'
 
 type BookingDetailNavigationProp = StackNavigationProp<BookingsStackParamList, 'BookingDetail'>
 type BookingDetailRouteProp = RouteProp<BookingsStackParamList, 'BookingDetail'>
@@ -19,20 +20,6 @@ type BookingDetailRouteProp = RouteProp<BookingsStackParamList, 'BookingDetail'>
 type Props = {
     navigation: BookingDetailNavigationProp,
     route: BookingDetailRouteProp
-}
-
-function formatDateTime(value?: string | Date) {
-    if (!value) return '—'
-    const date = new Date(value)
-    if (isNaN(date.getTime())) return String(value)
-    return date.toLocaleString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-    })
 }
 
 const BookingDetail = ({ navigation, route }: Props) => {

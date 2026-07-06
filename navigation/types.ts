@@ -35,10 +35,14 @@ export type MessagesStackParamList = {
     Chat: { conversationId: string }
 }
 
-export type ProviderStackParamList = {
-    Dashboard: undefined
-    BookingDetail: {bookingId: string}
-    MyServices: undefined
-    Chat: {conversationId: string}
-    Profile: undefined
+export type ProviderTabParamList = {
+    BookingsTab: undefined
+    ServicesTab: undefined
+    EarningsTab: undefined
+    ProfileTab: undefined
+}
+
+export type ProviderBookingsStackParamList = {
+    ProviderBookings: undefined
+    ProviderBookingDetail: { bookingId: string }
 }

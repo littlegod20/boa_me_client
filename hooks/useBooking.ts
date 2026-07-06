@@ -11,6 +11,14 @@ export const useGetBookings = () => {
     })
 }
 
+export const useGetProviderBookings = () => {
+    return useQuery({
+        queryKey: ['bookings', 'provider'],
+        queryFn: () => getBookings('provider'),
+        select: (data) => data.data
+    })
+}
+
 export const useCreateBooking = () => {
     return useMutation({
         mutationFn: (booking: CreateBookingInput) => createBooking(booking),

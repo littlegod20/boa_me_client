@@ -17,6 +17,7 @@ export interface Booking {
     booking_status: BookingStatus
     service_name: string
     provider_name: string
+    customer_name:string
     price: number
     review_id:string
     customer_location: string
@@ -37,6 +38,8 @@ export type CreateBookingInput = {
 export type BookingCardTypes = {
     service_name?: string
     provider_name?: string
+    customer_name?:string
+    perspective?:'customer' | 'provider'
     price?: number
     scheduled_at: string
     customer_location: string

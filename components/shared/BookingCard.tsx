@@ -18,7 +18,7 @@ function formatScheduledAt(value: string) {
 }
 
 export function BookingCard({ service_name, provider_name, price, scheduled_at,
-    customer_location, booking_status, showChevron, onPress, style, }: BookingCardTypes) {
+    customer_location, booking_status, showChevron, onPress, style,perspective, customer_name }: BookingCardTypes) {
     const { colors } = useTheme();
 
     return (
@@ -39,8 +39,11 @@ export function BookingCard({ service_name, provider_name, price, scheduled_at,
                 </View>
 
                 <Text style={[styles.provider, { color: colors.textSecondary }]}>
-                    by {provider_name} · GHS {price}
+                    {perspective === 'provider'
+                        ? `for ${customer_name} · GHS ${price}`
+                        : `by ${provider_name} · GHS ${price}`}
                 </Text>
+
                 <View style={styles.row}>
                     <Calendar size={16} color={colors.textSecondary} />
                     <Text style={[styles.rowText, { color: colors.text }]} numberOfLines={1}>
