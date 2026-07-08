@@ -55,3 +55,8 @@ export const registerAsProvider = async (providerData: CreateProvider) => {
     const response = await api.post(`/providers/register`, providerData)
     return response.data
 }
+
+export const getProviderEarnings = async () => {
+    const response = await api.get(`/providers/earnings`)
+    return response.data
+}

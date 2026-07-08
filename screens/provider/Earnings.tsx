@@ -1,9 +1,201 @@
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native'
+import { ArrowDownLeft } from 'lucide-react-native'
+import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
+import ScreenContainer from '../../components/shared/ScreenContainer'
+import ScreenHeader from '../../components/shared/ScreenHeader'
+import TransactionStatusBadge from '../../components/shared/TransactionStatusBadge'
+import { useTheme } from '../../context/ThemeContext'
+import { useGetProviderEarnings } from '../../hooks/useProviders'
+import { ProviderTransaction } from '../../types/transaction.types'
+
+function formatCurrency(value: number) {
+  const amount = Number(value) || 0
+  return `GHS ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+function formatDate(value: string) {
+  const date = new Date(value)
+  if (isNaN(date.getTime())) return value
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
 
 export default function Earnings() {
-  return (
-    <View>
-      <Text>Earnings</Text>
+  const { colors } = useTheme()
+  const { data, isLoading, isError } = useGetProviderEarnings()
+
+  const renderSummary = () => (
+    <View style={styles.summaryRow}>
+      <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total Earned</Text>
+        <Text style={[styles.summaryValue, { color: colors.success }]} numberOfLines={1} adjustsFontSizeToFit>
+          {formatCurrency(data?.totalEarned ?? 0)}
+        </Text>
+      </View>
+
+      <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Pending</Text>
+        <Text style={[styles.summaryValue, { color: colors.warning }]} numberOfLines={1} adjustsFontSizeToFit>
+          {formatCurrency(data?.pending ?? 0)}
+        </Text>
+      </View>
     </View>
   )
+
+  const renderTransaction = ({ item }: { item: ProviderTransaction }) => (
+    <View style={[styles.txCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={[styles.txIcon, { backgroundColor: colors.primary + '20' }]}>
+        <ArrowDownLeft size={20} color={colors.primary} />
+      </View>
+
+      <View style={styles.txContent}>
+        <View style={styles.txHeader}>
+          <Text style={[styles.txTitle, { color: colors.text }]} numberOfLines={1}>
+            {item.service_name ?? 'Payout'}
+          </Text>
+          <Text style={[styles.txAmount, { color: colors.text }]} numberOfLines={1}>
+            {formatCurrency(item.amount)}
+          </Text>
+        </View>
+
+        <Text style={[styles.txSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+          {item.customer_name ? `From ${item.customer_name}` : 'Customer'} · {formatDate(item.created_at)}
+        </Text>
+
+        <TransactionStatusBadge status={item.transaction_status} />
+      </View>
+    </View>
+  )
+
+  return (
+    <ScreenContainer>
+      <ScreenHeader
+        title="Earnings"
+        description="Track your payouts and pending balance"
+      />
+
+      {isLoading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : isError ? (
+        <View style={styles.centered}>
+          <Text style={[styles.message, { color: colors.error }]}>
+            Something went wrong while fetching your earnings
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={data?.transactions ?? []}
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <>
+              {renderSummary()}
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Payout History</Text>
+            </>
+          }
+          renderItem={renderTransaction}
+          ListEmptyComponent={
+            <View style={styles.centered}>
+              <Text style={[styles.message, { color: colors.textSecondary }]}>
+                No payouts yet. Completed jobs will show up here.
+              </Text>
+            </View>
+          }
+          keyExtractor={(item) => item.id}
+        />
+      )}
+    </ScreenContainer>
+  )
 }
+
+const styles = StyleSheet.create({
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.xl,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  summaryCard: {
+    flex: 1,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+  },
+  summaryLabel: {
+    fontSize: typography.sizes.sm,
+    fontFamily: fonts.medium,
+  },
+  summaryValue: {
+    fontSize: typography.sizes.xl,
+    fontFamily: fonts.semibold,
+  },
+  sectionTitle: {
+    fontSize: typography.sizes.lg,
+    fontFamily: fonts.semibold,
+    marginBottom: spacing.md,
+  },
+  txCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+    gap: spacing.md,
+  },
+  txIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  txContent: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+  txHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  txTitle: {
+    flex: 1,
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.semibold,
+  },
+  txAmount: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.semibold,
+  },
+  txSubtitle: {
+    fontSize: typography.sizes.sm,
+    fontFamily: fonts.regular,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
+  },
+  message: {
+    fontSize: typography.sizes.md,
+    fontFamily: fonts.regular,
+    textAlign: 'center',
+  },
+})

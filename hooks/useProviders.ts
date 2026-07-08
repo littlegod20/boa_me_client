@@ -1,8 +1,17 @@
-import { createProviderService, deleteProviderService, getProviderServiceById, getProviderServices, getServiceProviders, registerAsProvider, updateProviderService } from "../services/provider.service"
+import { createProviderService, deleteProviderService, getProviderEarnings, getProviderServiceById, getProviderServices, getServiceProviders, registerAsProvider, updateProviderService } from "../services/provider.service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../store/authStore"
 import { CreateProvider, ProviderServiceDetailed } from "../types/provider.types"
+import { ProviderEarnings } from "../types/transaction.types"
 import { parseJwtPayload } from "../utils/jwt"
+
+export const useGetProviderEarnings = () => {
+    return useQuery({
+        queryKey: ['provider-earnings'],
+        queryFn: getProviderEarnings,
+        select: (data) => data.data as ProviderEarnings,
+    })
+}
 
 export const useGetServiceProviders = (serviceId: string, page?: number, limit?: number) => {
     return useQuery({
