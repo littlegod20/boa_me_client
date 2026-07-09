@@ -12,6 +12,7 @@ export enum BookingStatus {
 export interface Booking {
     id: string
     customer_id: string
+    provider_user_id:string
     provider_service_id: string
     scheduled_at: string
     booking_status: BookingStatus

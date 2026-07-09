@@ -13,6 +13,7 @@ import { DetailRow } from '../../components/shared/DetailRow'
 import BoameBtn from '../../components/shared/BoameBtn'
 import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
+import { useCreateConversation } from '../../hooks/useConversations'
 
 type BookingDetailNavigationProp = StackNavigationProp<BookingsStackParamList, 'BookingDetail'>
 type BookingDetailRouteProp = RouteProp<BookingsStackParamList, 'BookingDetail'>
@@ -27,6 +28,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
     const { colors } = useTheme()
     const { data, isLoading, isError } = useGetBookingById(bookingId)
     const {mutateAsync, isPending, isError:statusError} = useChangeBookingStatus()
+    const {mutateAsync: createConvo} = useCreateConversation()
 
 
     const cancellableStatuses = [
@@ -72,6 +74,11 @@ const BookingDetail = ({ navigation, route }: Props) => {
         )
     }
 
+    const handleMessage = async () => {
+        const res = await createConvo({booking_id: data.id, provider_id:data.provider_user_id})
+        const conversation = res.data
+        navigation.navigate('Chat', {conversationId:conversation.id, otherName:data.provider_name})
+    }
 
     return (
         <ScreenContainer>
@@ -147,7 +154,7 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     <BoameBtn 
                                     title='Message' 
                                     variant='outline'
-                                    onPress={()=>console.log('message')}
+                                    onPress={handleMessage}
                                     fullWidth={false}
                                     />
 
@@ -167,10 +174,12 @@ const BookingDetail = ({ navigation, route }: Props) => {
                                     })}
                                     fullWidth={false}
                                     />
+
+                                    {/* TODO: when user messages provider for the first time this btn changes to view conversation button */}
                                     <BoameBtn 
                                     title='Message' 
                                     variant='outline'
-                                    onPress={()=>console.log('message')}
+                                    onPress={handleMessage}
                                     fullWidth={false}
                                     />
                                 </>

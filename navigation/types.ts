@@ -21,6 +21,7 @@ export type HomeStackParamList = {
 export type BookingsStackParamList = {
     MyBookings: undefined
     BookingDetail: { bookingId: string }
+    Chat: {conversationId?:string, otherName?:string}
     ReviewBooking: {bookingId: string, serviceName?: string, providerName?: string}
     ReviewDetail: { reviewId: string }
 }
@@ -32,7 +33,7 @@ export type ProfileStackParamList = {
 
 export type MessagesStackParamList = {
     Conversations: undefined
-    Chat: { conversationId: string }
+    Chat: { conversationId: string, otherName?: string }
 }
 
 export type ProviderTabParamList = {

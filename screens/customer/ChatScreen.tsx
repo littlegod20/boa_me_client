@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { MessageCircle } from 'lucide-react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
-import ScreenHeader from '../../components/shared/ScreenHeader'
 import { useTheme } from '../../context/ThemeContext'
 import { fonts, spacing, typography } from '../../constants/theme'
 
@@ -10,8 +9,6 @@ const ChatScreen = () => {
 
   return (
     <ScreenContainer>
-      <ScreenHeader title='Messages' description='Chat with your service providers' />
-
       <View style={styles.centered}>
         <View style={[styles.iconCircle, { backgroundColor: colors.primary + '20' }]}>
           <MessageCircle size={40} color={colors.primary} />

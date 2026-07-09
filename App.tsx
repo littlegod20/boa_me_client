@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from "react-native";
+import { SocketProvider } from "./context/SocketContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,11 +34,15 @@ export default function App() {
 if (!fontsLoaded && !fontError) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <RootNavigator/>
+    <ThemeProvider>
+      
+      <QueryClientProvider client={queryClient}>
+        <SocketProvider>
+          <RootNavigator/>
+        </SocketProvider>
+      </QueryClientProvider>
+
         <ThemedStatusBar />
       </ThemeProvider>
-    </QueryClientProvider>
   );
 }
