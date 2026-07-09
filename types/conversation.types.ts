@@ -14,6 +14,7 @@ export interface ConversationListItem extends Conversation {
     customer_profile: string | null
     provider_name: string | null
     provider_profile: string | null
+    last_message:string
 }
 
 export interface Message {
