@@ -40,6 +40,7 @@ export type ProviderTabParamList = {
     BookingsTab: undefined
     ServicesTab: undefined
     EarningsTab: undefined
+    MessagesTab: undefined
     ProfileTab: undefined
 }
 

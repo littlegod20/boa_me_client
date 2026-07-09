@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     },
     rowOwn: {
         justifyContent: 'flex-end',
+        marginTop:15
     },
     rowOther: {
         justifyContent: 'flex-start',

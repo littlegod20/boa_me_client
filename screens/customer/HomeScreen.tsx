@@ -13,6 +13,7 @@ import ListCard from '../../components/shared/ListCard'
 import { useState } from 'react'
 import SegmentedTabs from '../../components/shared/SegmentedTabs'
 import ScreenContainer from '../../components/shared/ScreenContainer'
+import ProfileHeaderButton from '../../components/shared/ProfileHeaderButton'
 
 const DUMMY_POPULAR = [
     { id: '1', name: 'Premium Car Wash', subtitle: 'From GHS 50 · ⭐ 4.8' },
@@ -65,6 +66,11 @@ export default function HomeScreen({navigation}: Props) {
 
   return (
     <ScreenContainer>
+        {/* Top bar with profile */}
+        <View style={styles.topBar}>
+            <ProfileHeaderButton />
+        </View>
+
         {/* Greeting header */}
         <View style={styles.greetingContainer}>
         <Text 
@@ -118,8 +124,13 @@ export default function HomeScreen({navigation}: Props) {
 }
 
 const styles = StyleSheet.create({
+  topBar: {
+    marginTop: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   greetingContainer: {
-    marginTop: spacing.xl,
+    marginTop: spacing.md,
     marginBottom: spacing.lg
   },
   greetingText: {
