@@ -7,6 +7,7 @@ import CustomerNavigator from './CustomerNavigator'
 import * as Linking from 'expo-linking'
 import { LinkingOptions } from '@react-navigation/native'
 import { useEffect } from 'react'
+import { useSyncUnreadFromConversations, useUnreadMessagesListener } from '../hooks/useUnreadMessages'
 
 type RootParamList = {
     Auth: undefined,
@@ -35,6 +36,9 @@ const Stack = createStackNavigator<RootParamList>()
 
 export default function RootNavigator () {
     const {token, user, logout} = useAuthStore()
+
+    useUnreadMessagesListener()
+    useSyncUnreadFromConversations()
 
     return (
     <NavigationContainer linking={linking}>

@@ -34,11 +34,11 @@ function formatTime(value?: string | null) {
 
 export default function ConversationsScreen({ navigation }: Props) {
   const { colors } = useTheme()
-  const currentUserId = useAuthStore((state) => state.user?.id)
+  const {user} = useAuthStore()
   const { data: conversations, isLoading, isError } = useGetConversations()
 
   const renderConversation = ({ item }: { item: ConversationListItem }) => {
-    const isCustomer = item.customer_id === currentUserId
+    const isCustomer = item.customer_id === user?.id
     const otherName = (isCustomer ? item.provider_name : item.customer_name) ?? 'Unknown'
     const otherProfile = isCustomer ? item.provider_profile : item.customer_profile
 
@@ -77,7 +77,7 @@ export default function ConversationsScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <ScreenHeader title="Messages" description="Chat with your service providers" />
+      <ScreenHeader title="Messages" description={`Chat with your ${user?.role === 'provider' ? "customers or service providers": 'service providers'}`} />
 
       {isLoading ? (
         <View style={styles.centered}>

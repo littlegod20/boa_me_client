@@ -12,6 +12,7 @@ export interface Conversation {
 export interface ConversationListItem extends Conversation {
     customer_name: string | null
     customer_profile: string | null
+    unread_count:number
     provider_name: string | null
     provider_profile: string | null
     last_message:string

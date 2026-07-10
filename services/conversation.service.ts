@@ -15,3 +15,8 @@ export const createConversation = async (input: { booking_id?: string, provider_
     const response = await api.post('/conversations', input)
     return response.data
 }
+
+export const markConversationRead = async (conversationId: string) => {
+    const response = await api.patch(`/conversations/${conversationId}/read`)
+    return response.data
+}

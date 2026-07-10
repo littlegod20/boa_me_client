@@ -68,10 +68,10 @@ const styles = StyleSheet.create({
     },
     rowOwn: {
         justifyContent: 'flex-end',
-        marginTop:15
     },
     rowOther: {
         justifyContent: 'flex-start',
+        // marginTop:15
     },
     bubble: {
         maxWidth: '80%',

@@ -3,10 +3,12 @@ import { CustomerTabParamList } from "./types";
 import HomeStackNavigator from "./HomeStackNavigator";
 import BookingsStackNavigator from "./BookingsStackNavigator";
 import MessagesStackNavigator from "./MessagesStackNavigator";
-import { BookMinus, Home, MessageCircle } from "lucide-react-native";
+import { BookMinus, Home } from "lucide-react-native";
 import { useTheme } from "../context/ThemeContext";
 import { fonts } from "../constants/theme";
 import { ProfileStackNavigator } from "./ProfileStackNavigator";
+import MessageTabIcon from "../components/shared/MessageTabIcon";
+import { useUnreadStore } from "../store/unreadStore";
 
 const Tab = createBottomTabNavigator<CustomerTabParamList>()
 
@@ -43,12 +45,19 @@ export default function CustomerNavigator() {
                     <BookMinus color={color} size={size} />
                 )
             }} />
-            <Tab.Screen name='MessagesTab' component={MessagesStackNavigator} options={{
-                tabBarLabel: 'Messages',
-                tabBarIcon: ({color, size}) => (
-                    <MessageCircle color={color} size={size} />
-                )
-            }} />
+            <Tab.Screen
+                name='MessagesTab'
+                component={MessagesStackNavigator}
+                options={{
+                    tabBarLabel: 'Messages',
+                    tabBarIcon: ({color, size}) => (
+                        <MessageTabIcon color={color} size={size} />
+                    )
+                }}
+                // listeners={{
+                //     focus: () => useUnreadStore.getState().setHasUnreadMessages(false),
+                // }}
+            />
             <Tab.Screen name='ProfileTab' component={ProfileStackNavigator} options={{
                 tabBarButton: () => null,
                 tabBarItemStyle: { display: 'none' },

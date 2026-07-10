@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { LayoutDashboardIcon, Wallet, Wrench, MessageCircle } from "lucide-react-native";
+import { LayoutDashboardIcon, Wallet, Wrench } from "lucide-react-native";
 import { useTheme } from "../context/ThemeContext";
 import { fonts } from "../constants/theme";
 import ProviderBookingsStackNavigator from "./ProviderBookingsStackNavigator";
@@ -8,11 +8,16 @@ import { ProfileStackNavigator } from "./ProfileStackNavigator";
 import Earnings from "../screens/provider/Earnings";
 import ProviderServicesStackNavigator from "./ProviderServicesStackNavigator";
 import MessagesStackNavigator from "./MessagesStackNavigator";
+import MessageTabIcon from "../components/shared/MessageTabIcon";
+import { useUnreadStore } from "../store/unreadStore";
 
 const Tab = createBottomTabNavigator<ProviderTabParamList>()
 
 export default function ProviderNavigator() {
     const {colors} = useTheme()
+    const {hasUnreadMessages,activeConversationId} = useUnreadStore()
+    console.log('hasUnreadMessages',hasUnreadMessages)
+    console.log('activeConversationId', activeConversationId)
     return (
         <Tab.Navigator
             screenOptions={{
@@ -54,12 +59,19 @@ export default function ProviderNavigator() {
                 )
             }}/>
 
-             <Tab.Screen name="MessagesTab" component={MessagesStackNavigator} options={{
-                tabBarLabel:'Messages',
-                tabBarIcon:({color, size})=>(
-                    <MessageCircle color={color} size={size} />
-                )
-            }}/>
+             <Tab.Screen
+                name="MessagesTab"
+                component={MessagesStackNavigator}
+                options={{
+                    tabBarLabel:'Messages',
+                    tabBarIcon:({color, size})=>(
+                        <MessageTabIcon color={color} size={size} />
+                    )
+                }}
+                // listeners={{
+                //     focus: () => useUnreadStore.getState().setHasUnreadMessages(false),
+                // }}
+            />
             
             <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{
                 tabBarButton: () => null,

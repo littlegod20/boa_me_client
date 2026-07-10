@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createConversation, getConversationMessages, getConversations } from "../services/conversation.service"
+import { createConversation, getConversationMessages, getConversations, markConversationRead } from "../services/conversation.service"
 import { ConversationListItem, Message } from "../types/conversation.types"
 
 export const useGetConversations = () => {
@@ -29,5 +29,15 @@ export const useCreateConversation = () => {
         onError: (error) => {
             console.log(error)
         }
+    })
+}
+
+export const useMarkConversationRead = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (conversationId: string) => markConversationRead(conversationId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        },
     })
 }

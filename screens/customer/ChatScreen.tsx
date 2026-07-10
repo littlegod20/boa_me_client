@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import {
   ActivityIndicator,
   FlatList,
@@ -14,8 +15,9 @@ import { RouteProp } from '@react-navigation/core'
 import { useTheme } from '../../context/ThemeContext'
 import { useSocket } from '../../context/SocketContext'
 import { useAuthStore } from '../../store/authStore'
+import { useUnreadStore } from '../../store/unreadStore'
 import { fonts, layout, spacing, typography } from '../../constants/theme'
-import { useGetConversationMessages } from '../../hooks/useConversations'
+import { useGetConversationMessages, useMarkConversationRead } from '../../hooks/useConversations'
 import { Message } from '../../types/conversation.types'
 import { BookingsStackParamList } from '../../navigation/types'
 import ChatHeader from '../../components/chat/ChatHeader'
@@ -56,18 +58,32 @@ const ChatScreen = ({ navigation, route }: Props) => {
   const { socket } = useSocket()
   const currentUserId = useAuthStore((state) => state.user?.id)
   const { otherName, conversationId } = route.params
+  
   const { data: conversationMessages, isLoading, isError } = useGetConversationMessages(conversationId)
-
   const [messages, setMessages] = useState<Message[]>([])
   const [draft, setDraft] = useState('')
   const listRef = useRef<FlatList<ListItem>>(null)
+
+  const { mutate: markRead } = useMarkConversationRead()
+
+  useFocusEffect(
+    useCallback(() => {
+      const { setActiveConversationId, setHasUnreadMessages } = useUnreadStore.getState()
+      setActiveConversationId(conversationId)
+      setHasUnreadMessages(false)
+      markRead(conversationId)
+      return () => setActiveConversationId(null)
+    }, [conversationId])
+  )
 
   useEffect(() => {
     if (conversationMessages) setMessages(conversationMessages)
   }, [conversationMessages])
 
   useEffect(() => {
-    if (!socket) return
+    if (!socket || !conversationId) return
+
+    socket.emit('join_conversation', {conversation_id:conversationId})
 
     const handleNewMessage = (message: Message) => {
       if (message.conversation_id !== conversationId) return
@@ -102,6 +118,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
   }
 
   const renderItem = ({ item }: { item: ListItem }) => {
+    // console.log('item:', item)
     if (item.type === 'date') {
       return <ChatDateSeparator label={item.label} />
     }
