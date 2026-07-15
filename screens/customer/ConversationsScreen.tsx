@@ -67,9 +67,17 @@ export default function ConversationsScreen({ navigation }: Props) {
             </Text>
           </View>
 
-          <Text style={[styles.preview, { color: colors.textSecondary }]} numberOfLines={1}>
-            {item.last_message ?? 'No messages yet'}
-          </Text>
+          <View style={[styles.previewContainer]}>
+            <Text style={[styles.preview, { color: colors.textSecondary }]} numberOfLines={1}>
+              {item.last_message ?? 'No messages yet'}
+            </Text>
+            
+              { item.unread_count > 0 &&
+                (<Text style={{color:'white', backgroundColor:colors.primary, paddingHorizontal:6, borderRadius:999}}>
+                {item.unread_count}
+                </Text>)
+              }
+          </View>
         </View>
       </Pressable>
     )
@@ -162,6 +170,12 @@ const styles = StyleSheet.create({
   preview: {
     fontSize: typography.sizes.sm,
     fontFamily: fonts.regular,
+    width:200
+  },
+  previewContainer:{
+    flexDirection:'row',
+    display:'flex',
+    justifyContent:'space-between'
   },
   centered: {
     flex: 1,

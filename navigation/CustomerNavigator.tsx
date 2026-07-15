@@ -54,9 +54,6 @@ export default function CustomerNavigator() {
                         <MessageTabIcon color={color} size={size} />
                     )
                 }}
-                // listeners={{
-                //     focus: () => useUnreadStore.getState().setHasUnreadMessages(false),
-                // }}
             />
             <Tab.Screen name='ProfileTab' component={ProfileStackNavigator} options={{
                 tabBarButton: () => null,

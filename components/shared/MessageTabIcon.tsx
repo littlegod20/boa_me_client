@@ -11,7 +11,6 @@ type Props = {
 export default function MessageTabIcon({ color, size }: Props) {
     const { colors } = useTheme()
     const hasUnreadMessages = useUnreadStore((state) => state.hasUnreadMessages)
-    console.log('tab unread messages:', hasUnreadMessages)
     return (
         <View>
             <MessageCircle color={color} size={size} />
@@ -19,7 +18,7 @@ export default function MessageTabIcon({ color, size }: Props) {
                 <View
                     style={[
                         styles.dot,
-                        { backgroundColor: colors.error, borderColor: colors.background },
+                        { backgroundColor: colors.primary, borderColor: colors.background },
                     ]}
                 />
             )}
