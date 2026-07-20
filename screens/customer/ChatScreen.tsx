@@ -40,8 +40,9 @@ type ListItem =
 function buildListItems(messages: Message[]): ListItem[] {
   const items: ListItem[] = []
   let lastDate = ''
+  const invertedMessages = messages.reverse()
 
-  for (const message of messages) {
+  for (const message of invertedMessages) {
     const dateKey = new Date(message.created_at).toDateString()
     if (dateKey !== lastDate) {
       lastDate = dateKey
@@ -86,10 +87,13 @@ const ChatScreen = ({ navigation, route }: Props) => {
     socket.emit('join_conversation', {conversation_id:conversationId})
 
     const handleNewMessage = (message: Message) => {
+      console.log('sending new message:', message)
       if (message.conversation_id !== conversationId) return
       setMessages((prev) => {
         if (prev.some((m) => m.id === message.id)) return prev
-        return [...prev, message]
+        console.log("previous messages", prev.toString())
+        const invertedPrev = prev.reverse()
+        return [...invertedPrev, message]
       })
     }
 
@@ -105,9 +109,6 @@ const ChatScreen = ({ navigation, route }: Props) => {
     requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }))
   }
 
-  useEffect(() => {
-    if (listItems.length) scrollToEnd()
-  }, [listItems.length])
 
   const handleSend = () => {
     const content = draft.trim()
@@ -118,7 +119,6 @@ const ChatScreen = ({ navigation, route }: Props) => {
   }
 
   const renderItem = ({ item }: { item: ListItem }) => {
-    // console.log('item:', item)
     if (item.type === 'date') {
       return <ChatDateSeparator label={item.label} />
     }
