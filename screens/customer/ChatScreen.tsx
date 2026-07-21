@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import {
   ActivityIndicator,
@@ -19,14 +19,14 @@ import { useUnreadStore } from '../../store/unreadStore'
 import { fonts, layout, spacing, typography } from '../../constants/theme'
 import { useGetConversationMessages, useGetConversations, useMarkConversationRead } from '../../hooks/useConversations'
 import { Message } from '../../types/conversation.types'
-import { BookingsStackParamList } from '../../navigation/types'
+import { RootParamList } from '../../navigation/types'
 import ChatHeader from '../../components/chat/ChatHeader'
 import ChatInputBar from '../../components/chat/ChatInputBar'
 import MessageBubble from '../../components/chat/MessageBubble'
 import ChatDateSeparator, { formatDateLabel } from '../../components/chat/ChatDateSeparator'
 
-type ChatScreenNavigationProp = StackNavigationProp<BookingsStackParamList, 'Chat'>
-type ChatScreenRouteProp = RouteProp<BookingsStackParamList, 'Chat'>
+type ChatScreenNavigationProp = StackNavigationProp<RootParamList, 'Chat'>
+type ChatScreenRouteProp = RouteProp<RootParamList, 'Chat'>
 
 type Props = {
   navigation: ChatScreenNavigationProp
@@ -135,7 +135,7 @@ const ChatScreen = ({ navigation, route }: Props) => {
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <View style={styles.headerWrapper}>
         <ChatHeader
           name={otherName ?? 'Chat'}

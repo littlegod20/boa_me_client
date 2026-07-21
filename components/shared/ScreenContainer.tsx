@@ -11,7 +11,7 @@ type Props = {
 export default function ScreenContainer({ children }: Props) {
     const { colors } = useTheme()
     return (
-        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
+        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={[]}>
             <View style={styles.content}>{children}</View>
         </SafeAreaView>
     )
@@ -19,5 +19,5 @@ export default function ScreenContainer({ children }: Props) {
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },
-    content: { paddingHorizontal: layout.screenPadding , flex:1},
+    content: { paddingHorizontal: layout.screenPadding, flex: 1 },
 })

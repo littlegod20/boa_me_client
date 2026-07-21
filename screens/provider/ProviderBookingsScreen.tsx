@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-nativ
 import { fonts, spacing, typography } from '../../constants/theme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
-import ProfileHeaderButton from '../../components/shared/ProfileHeaderButton'
 import { useTheme } from '../../context/ThemeContext'
 import { useGetProviderBookings } from '../../hooks/useBooking'
 import { BookingCard } from '../../components/shared/BookingCard'
@@ -25,10 +24,6 @@ export default function ProviderBookingsScreen({navigation}:Props) {
 
     return (
         <ScreenContainer>
-            <View style={styles.topBar}>
-                <ProfileHeaderButton />
-            </View>
-
             <ScreenHeader
             title='Customer Bookings'
             description='Track and manage your customer bookings'
@@ -83,11 +78,6 @@ export default function ProviderBookingsScreen({navigation}:Props) {
 }
 
 const styles = StyleSheet.create({
-    topBar: {
-      marginTop: spacing.lg,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
     list: {
       flex: 1,
     },

@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, Pressable, Image } from 'react-native'
+import { CompositeNavigationProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import ScreenContainer from '../../components/shared/ScreenContainer'
@@ -7,9 +8,12 @@ import { useTheme } from '../../context/ThemeContext'
 import { useGetConversations } from '../../hooks/useConversations'
 import { useAuthStore } from '../../store/authStore'
 import { ConversationListItem } from '../../types/conversation.types'
-import { MessagesStackParamList } from '../../navigation/types'
+import { MessagesStackParamList, RootParamList } from '../../navigation/types'
 
-type ConversationsScreenNavigationProp = StackNavigationProp<MessagesStackParamList, 'Conversations'>
+type ConversationsScreenNavigationProp = CompositeNavigationProp<
+  StackNavigationProp<MessagesStackParamList, 'Conversations'>,
+  StackNavigationProp<RootParamList>
+>
 
 type Props = {
   navigation: ConversationsScreenNavigationProp

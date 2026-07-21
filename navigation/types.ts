@@ -4,6 +4,18 @@ export type AuthStackParamList = {
     VerifyEmail: {email: string}
 }
 
+export type ChatParams = {
+    conversationId: string
+    otherName?: string
+}
+
+export type RootParamList = {
+    Auth: undefined
+    Provider: undefined
+    Customer: undefined
+    Chat: ChatParams
+}
+
 export type CustomerTabParamList = {
     HomeTab: undefined
     BookingsTab: undefined
@@ -21,7 +33,6 @@ export type HomeStackParamList = {
 export type BookingsStackParamList = {
     MyBookings: undefined
     BookingDetail: { bookingId: string }
-    Chat: {conversationId:string, otherName?:string}
     ReviewBooking: {bookingId: string, serviceName?: string, providerName?: string}
     ReviewDetail: { reviewId: string }
 }
@@ -33,7 +44,6 @@ export type ProfileStackParamList = {
 
 export type MessagesStackParamList = {
     Conversations: undefined
-    Chat: { conversationId: string, otherName?: string }
 }
 
 export type ProviderTabParamList = {

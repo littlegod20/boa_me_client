@@ -1,11 +1,9 @@
-import { View, Text, ActivityIndicator, FlatList, StyleSheet, TextInput, Pressable } from 'react-native'
+import { View, Text, ActivityIndicator, FlatList, StyleSheet, Pressable } from 'react-native'
 import { useFetchCategories } from '../../hooks/useCategory'
 import { useTheme } from '../../context/ThemeContext'
 import { HomeStackParamList } from '../../navigation/types'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { useAuthStore } from '../../store/authStore'
-import { borderRadius, fonts, layout, spacing, typography } from '../../constants/theme'
-import { getGreeting } from '../../utils/greeting'
+import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { SearchIcon } from 'lucide-react-native'
 import CategoryTile from '../../components/shared/CategoryTile'
 import SectionHeader from '../../components/shared/SectionHeader'
@@ -13,7 +11,6 @@ import ListCard from '../../components/shared/ListCard'
 import { useState } from 'react'
 import SegmentedTabs from '../../components/shared/SegmentedTabs'
 import ScreenContainer from '../../components/shared/ScreenContainer'
-import ProfileHeaderButton from '../../components/shared/ProfileHeaderButton'
 
 const DUMMY_POPULAR = [
     { id: '1', name: 'Premium Car Wash', subtitle: 'From GHS 50 · ⭐ 4.8' },
@@ -46,7 +43,6 @@ type Props = {
 export default function HomeScreen({navigation}: Props) {
   const {data, isLoading, error} = useFetchCategories()
   const {colors} = useTheme()
-  const user = useAuthStore(state => state.user)
   const [activeTab, setActiveTab] = useState<'popular' | 'featured'>('popular')
 
   const listData = activeTab === 'popular' ? DUMMY_POPULAR : DUMMY_FEATURED
@@ -66,20 +62,6 @@ export default function HomeScreen({navigation}: Props) {
 
   return (
     <ScreenContainer>
-        {/* Top bar with profile */}
-        <View style={styles.topBar}>
-            <ProfileHeaderButton />
-        </View>
-
-        {/* Greeting header */}
-        <View style={styles.greetingContainer}>
-        <Text 
-        style={[styles.greetingText, {color: colors.text}]}>
-            Good {getGreeting()},{'\n'} 
-            {user?.name?.split(' ')[0] || 'User'} 👋
-        </Text>
-        </View>
-
         {/* Search bar */}
         <Pressable style={[styles.searchContainer, {backgroundColor: colors.surface, borderColor: colors.border}]}>
         <SearchIcon color={colors.primary} size={20} />
@@ -124,19 +106,6 @@ export default function HomeScreen({navigation}: Props) {
 }
 
 const styles = StyleSheet.create({
-  topBar: {
-    marginTop: spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  greetingContainer: {
-    marginTop: spacing.md,
-    marginBottom: spacing.lg
-  },
-  greetingText: {
-    fontSize: typography.sizes.xl,
-    fontFamily: fonts.semibold,
-  },
   searchText: {
     fontSize: typography.sizes.md,
     fontFamily: fonts.regular,
@@ -151,4 +120,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   }
-})  
+})

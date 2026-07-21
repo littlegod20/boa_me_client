@@ -1,19 +1,13 @@
-import {createStackNavigator} from '@react-navigation/stack'
-import {NavigationContainer} from '@react-navigation/native'
-import {useAuthStore} from '../store/authStore'
+import { createStackNavigator } from '@react-navigation/stack'
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native'
+import { useAuthStore } from '../store/authStore'
 import AuthNavigator from './AuthNavigator'
 import ProviderNavigator from './ProviderNavigator'
 import CustomerNavigator from './CustomerNavigator'
+import ChatScreen from '../screens/customer/ChatScreen'
 import * as Linking from 'expo-linking'
-import { LinkingOptions } from '@react-navigation/native'
-import { useEffect } from 'react'
 import { useSyncUnreadFromConversations, useUnreadMessagesListener } from '../hooks/useUnreadMessages'
-
-type RootParamList = {
-    Auth: undefined,
-    Provider: undefined,
-    Customer: undefined
-}
+import { RootParamList } from './types'
 
 const prefix = Linking.createURL('/')
 
@@ -21,36 +15,41 @@ const linking: LinkingOptions<RootParamList> = {
     prefixes: [prefix, 'boame://'],
     config: {
         screens: {
-            Auth:{
+            Auth: {
                 screens: {
                     Login: 'login',
                     Register: 'register',
-                    VerifyEmail: 'verify-email'
-                }
+                    VerifyEmail: 'verify-email',
+                },
             },
-        }
-    }
+        },
+    },
 }
 
 const Stack = createStackNavigator<RootParamList>()
 
-export default function RootNavigator () {
-    const {token, user, logout} = useAuthStore()
+export default function RootNavigator() {
+    const { token, user } = useAuthStore()
 
     useUnreadMessagesListener()
     useSyncUnreadFromConversations()
 
     return (
-    <NavigationContainer linking={linking}>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {!token ? (
-                <Stack.Screen name="Auth" component={AuthNavigator} />
-            ) : user?.role === 'provider' ? (
-                <Stack.Screen name="Provider" component={ProviderNavigator} />
-            ) : (
-                <Stack.Screen name="Customer" component={CustomerNavigator} />
-            )}
-        </Stack.Navigator>
-    </NavigationContainer>
+        <NavigationContainer linking={linking}>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+                {!token ? (
+                    <Stack.Screen name="Auth" component={AuthNavigator} />
+                ) : (
+                    <>
+                        {user?.role === 'provider' ? (
+                            <Stack.Screen name="Provider" component={ProviderNavigator} />
+                        ) : (
+                            <Stack.Screen name="Customer" component={CustomerNavigator} />
+                        )}
+                        <Stack.Screen name="Chat" component={ChatScreen} />
+                    </>
+                )}
+            </Stack.Navigator>
+        </NavigationContainer>
     )
 }

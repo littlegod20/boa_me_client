@@ -1,20 +1,17 @@
 import { Image, Pressable, StyleSheet, Text, StyleProp, ViewStyle } from 'react-native'
-import { useNavigation, NavigationProp } from '@react-navigation/native'
 import { useAuthStore } from '../../store/authStore'
 import { useTheme } from '../../context/ThemeContext'
-import { fonts, typography } from '../../constants/theme'
-
-type ProfileNavigation = NavigationProp<{ ProfileTab: undefined }>
+import { fonts } from '../../constants/theme'
 
 type Props = {
     avatarUri?: string | null
     size?: number
     style?: StyleProp<ViewStyle>
+    onPress: () => void
 }
 
-export default function ProfileHeaderButton({ avatarUri, size = 44, style }: Props) {
+export default function ProfileHeaderButton({ avatarUri, size = 44, style, onPress }: Props) {
     const { colors } = useTheme()
-    const navigation = useNavigation<ProfileNavigation>()
     const user = useAuthStore((state) => state.user)
 
     const initial = user?.name?.charAt(0).toUpperCase() ?? '?'
@@ -22,7 +19,7 @@ export default function ProfileHeaderButton({ avatarUri, size = 44, style }: Pro
 
     return (
         <Pressable
-            onPress={() => navigation.navigate('ProfileTab')}
+            onPress={onPress}
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel="Open profile"
@@ -34,9 +31,13 @@ export default function ProfileHeaderButton({ avatarUri, size = 44, style }: Pro
                 <Text
                     style={[
                         styles.initial,
-                        { color: colors.primary, backgroundColor: colors.primary + '20' },
+                        {
+                            color: colors.primary,
+                            backgroundColor: colors.primary + '20',
+                            fontSize: Math.round(size * 0.4),
+                            lineHeight: size,
+                        },
                         dimensions,
-                        { lineHeight: size },
                     ]}
                 >
                     {initial}
@@ -55,7 +56,6 @@ const styles = StyleSheet.create({
     },
     initial: {
         textAlign: 'center',
-        fontSize: typography.sizes.lg,
         fontFamily: fonts.semibold,
     },
 })

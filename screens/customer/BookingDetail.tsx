@@ -1,9 +1,10 @@
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
 import ScreenContainer from '../../components/shared/ScreenContainer'
 import ScreenHeader from '../../components/shared/ScreenHeader'
+import { CompositeNavigationProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { RouteProp } from '@react-navigation/core'
-import { BookingsStackParamList } from '../../navigation/types'
+import { BookingsStackParamList, RootParamList } from '../../navigation/types'
 import { useChangeBookingStatus, useGetBookingById } from '../../hooks/useBooking'
 import { borderRadius, fonts, spacing, typography } from '../../constants/theme'
 import { useTheme } from '../../context/ThemeContext'
@@ -15,7 +16,10 @@ import { BookingStatus } from '../../types/booking.types'
 import { formatDateTime } from '../../utils/formatDate'
 import { useCreateConversation } from '../../hooks/useConversations'
 
-type BookingDetailNavigationProp = StackNavigationProp<BookingsStackParamList, 'BookingDetail'>
+type BookingDetailNavigationProp = CompositeNavigationProp<
+    StackNavigationProp<BookingsStackParamList, 'BookingDetail'>,
+    StackNavigationProp<RootParamList>
+>
 type BookingDetailRouteProp = RouteProp<BookingsStackParamList, 'BookingDetail'>
 
 type Props = {
