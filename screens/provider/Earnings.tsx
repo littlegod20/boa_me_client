@@ -88,27 +88,25 @@ export default function Earnings() {
           </Text>
         </View>
       ) : (
-        <FlatList
-          data={data?.transactions ?? []}
-          style={styles.list}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <>
-              {renderSummary()}
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Payout History</Text>
-            </>
-          }
-          renderItem={renderTransaction}
-          ListEmptyComponent={
-            <View style={styles.centered}>
-              <Text style={[styles.message, { color: colors.textSecondary }]}>
-                No payouts yet. Completed jobs will show up here.
-              </Text>
-            </View>
-          }
-          keyExtractor={(item) => item.id}
-        />
+        <>
+          {renderSummary()}
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Payout History</Text>
+          <FlatList
+            data={data?.transactions ?? []}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            renderItem={renderTransaction}
+            ListEmptyComponent={
+              <View style={styles.centered}>
+                <Text style={[styles.message, { color: colors.textSecondary }]}>
+                  No payouts yet. Completed jobs will show up here.
+                </Text>
+              </View>
+            }
+            keyExtractor={(item) => item.id}
+          />
+        </>
       )}
     </ScreenContainer>
   )
