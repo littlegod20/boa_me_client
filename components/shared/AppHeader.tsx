@@ -17,7 +17,7 @@ export default function AppHeader({ onProfilePress }: Props) {
     const firstName = user?.name?.split(' ')[0] || 'there'
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { borderBottomColor: colors.border }]}>
             <View style={styles.left}>
                 <ProfileHeaderButton size={AVATAR_SIZE} onPress={onProfilePress} />
                 <Text style={[styles.greeting, { color: colors.text }]} numberOfLines={1}>
@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: layout.screenPadding,
         paddingTop: spacing.sm,
         paddingBottom: spacing.md,
+        borderBottomWidth: StyleSheet.hairlineWidth,
     },
     left: {
         flex: 1,
