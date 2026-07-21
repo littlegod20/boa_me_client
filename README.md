@@ -2,7 +2,7 @@
 
 React Native (Expo) mobile app for **Boame** — a service marketplace that connects customers to vetted providers for domestic and commercial services, starting with car wash and home cleaning.
 
-Built by **Asante** as a full-stack portfolio project. Pairs with the [Boame API](../server).
+Built by **Asante** as a full-stack portfolio project. Pairs with the [Boame API](https://github.com/littlegod20/boa_me).
 
 ---
 
