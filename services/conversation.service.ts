@@ -6,8 +6,10 @@ export const getConversations = async () => {
     return response.data
 }
 
-export const getConversationMessages = async (conversationId: string) => {
-    const response = await api.get(`/conversations/${conversationId}/messages`)
+export const getConversationMessages = async (conversationId: string, pageParam:{cursor_time:string, cursor_id:string} | null) => {
+    const response = await api.get(`/conversations/${conversationId}/messages`, {
+        params: { cursor_time: pageParam?.cursor_time, cursor_id: pageParam?.cursor_id, limit: 20 }
+    })
     return response.data
 }
 

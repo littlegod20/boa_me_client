@@ -17,7 +17,7 @@ import { useSocket } from '../../context/SocketContext'
 import { useAuthStore } from '../../store/authStore'
 import { useUnreadStore } from '../../store/unreadStore'
 import { fonts, layout, spacing, typography } from '../../constants/theme'
-import { useGetConversationMessages, useMarkConversationRead } from '../../hooks/useConversations'
+import { useGetConversationMessages, useGetConversations, useMarkConversationRead } from '../../hooks/useConversations'
 import { Message } from '../../types/conversation.types'
 import { BookingsStackParamList } from '../../navigation/types'
 import ChatHeader from '../../components/chat/ChatHeader'
@@ -40,9 +40,9 @@ type ListItem =
 function buildListItems(messages: Message[]): ListItem[] {
   const items: ListItem[] = []
   let lastDate = ''
-  const invertedMessages = messages.reverse()
+  const oldestFirst = [...messages].reverse()
 
-  for (const message of invertedMessages) {
+  for (const message of oldestFirst) {
     const dateKey = new Date(message.created_at).toDateString()
     if (dateKey !== lastDate) {
       lastDate = dateKey
@@ -51,7 +51,7 @@ function buildListItems(messages: Message[]): ListItem[] {
     items.push({ type: 'message', id: message.id, message })
   }
 
-  return items
+  return items.reverse()
 }
 
 const ChatScreen = ({ navigation, route }: Props) => {
@@ -60,12 +60,15 @@ const ChatScreen = ({ navigation, route }: Props) => {
   const currentUserId = useAuthStore((state) => state.user?.id)
   const { otherName, conversationId } = route.params
   
-  const { data: conversationMessages, isLoading, isError } = useGetConversationMessages(conversationId)
-  const [messages, setMessages] = useState<Message[]>([])
+  const { data: conversationMessages, isLoading, isError, hasNextPage, fetchNextPage } = useGetConversationMessages(conversationId)
   const [draft, setDraft] = useState('')
-  const listRef = useRef<FlatList<ListItem>>(null)
+  const conversationClient = useGetConversations()
 
   const { mutate: markRead } = useMarkConversationRead()
+
+  const historyMessages = conversationMessages ?? [] // server message history
+
+  const [liveMessages, setLiveMessages] = useState<Message[]>([]) // socket messages
 
   useFocusEffect(
     useCallback(() => {
@@ -77,9 +80,15 @@ const ChatScreen = ({ navigation, route }: Props) => {
     }, [conversationId])
   )
 
-  useEffect(() => {
-    if (conversationMessages) setMessages(conversationMessages)
-  }, [conversationMessages])
+  const messages = useMemo(()=>{
+    const combined = [...liveMessages, ...historyMessages]
+    const seen = new Set<string>()
+    return combined.filter((m)=>{
+      if(seen.has(m.id)) return false
+      seen.add(m.id)
+      return true
+    })
+  }, [liveMessages, historyMessages])
 
   useEffect(() => {
     if (!socket || !conversationId) return
@@ -87,14 +96,8 @@ const ChatScreen = ({ navigation, route }: Props) => {
     socket.emit('join_conversation', {conversation_id:conversationId})
 
     const handleNewMessage = (message: Message) => {
-      console.log('sending new message:', message)
       if (message.conversation_id !== conversationId) return
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === message.id)) return prev
-        console.log("previous messages", prev.toString())
-        const invertedPrev = prev.reverse()
-        return [...invertedPrev, message]
-      })
+      setLiveMessages((prev) => [message, ...prev])
     }
 
     socket.on('new_message', handleNewMessage)
@@ -103,20 +106,17 @@ const ChatScreen = ({ navigation, route }: Props) => {
     }
   }, [socket, conversationId])
 
-  const listItems = useMemo(() => buildListItems(messages), [messages])
-
-  const scrollToEnd = () => {
-    requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }))
-  }
-
-
   const handleSend = () => {
     const content = draft.trim()
     if (!content || !socket) return
 
     socket.emit('send_message', { conversation_id: conversationId, content })
+    // refetch conversation this message was sent in.
+    conversationClient.refetch()
     setDraft('')
   }
+
+  const listItems = useMemo(()=> buildListItems(messages), [messages])
 
   const renderItem = ({ item }: { item: ListItem }) => {
     if (item.type === 'date') {
@@ -160,14 +160,15 @@ const ChatScreen = ({ navigation, route }: Props) => {
           </View>
         ) : (
           <FlatList
-            ref={listRef}
+            inverted
             data={listItems}
+            onEndReached={() => { if (hasNextPage) fetchNextPage() }}
+            onEndReachedThreshold={0.5}
             style={styles.list}
             contentContainerStyle={styles.listContent}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.type === 'date' ? item.id : item.message.id}
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
-            onContentSizeChange={scrollToEnd}
             ListEmptyComponent={
               <View style={styles.centered}>
                 <Text style={[styles.message, { color: colors.textSecondary }]}>
