@@ -12,6 +12,36 @@ Customers browse services, pick a provider, book and pay via Mobile Money or car
 
 ---
 
+## Screenshots
+
+### Auth
+
+| Login | Register |
+|:-----:|:--------:|
+| ![Login](demo/login_screen.jpeg) | ![Register](demo/register_screen.jpeg) |
+
+### Customer
+
+| Home | Bookings | Booking detail |
+|:----:|:--------:|:--------------:|
+| ![Customer home](demo/customer_home_screen.jpeg) | ![Customer bookings](demo/customer_bookings_screen.jpeg) | ![Booking detail](demo/booking_detail.jpeg) |
+
+| Chat | Profile | Leave a review |
+|:----:|:-------:|:--------------:|
+| ![Chat](demo/chat_screen.jpeg) | ![Customer profile](demo/customer_profile_screen.jpeg) | ![Review completed service](demo/review_completed_service.jpeg) |
+
+| View review |
+|:-----------:|
+| ![View review](demo/view_review.jpeg) |
+
+### Provider
+
+| Dashboard | My services | Add service |
+|:---------:|:-----------:|:-----------:|
+| ![Provider home](demo/provider_home_screen.jpeg) | ![Provider services](demo/provider_services_screen.jpeg) | ![Add new service](demo/add_new_service.jpeg) |
+
+---
+
 ## Tech Stack
 
 | Layer | Technology | Why |
