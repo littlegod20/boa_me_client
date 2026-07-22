@@ -63,7 +63,7 @@ export default function HomeScreen({navigation}: Props) {
   return (
     <ScreenContainer>
         {/* Search bar */}
-        <Pressable style={[styles.searchContainer, {backgroundColor: colors.surface, borderColor: colors.border}]}>
+        <Pressable style={[styles.searchContainer, {backgroundColor: colors.surface, borderColor: colors.border, marginTop:spacing.md}]}>
         <SearchIcon color={colors.primary} size={20} />
         <Text style={[styles.searchText, {color: colors.textSecondary}]}>Search for a service...</Text>
         </Pressable>
