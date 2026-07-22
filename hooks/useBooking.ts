@@ -20,10 +20,11 @@ export const useGetProviderBookings = (status?: BookingStatus) => {
 }
 
 export const useCreateBooking = () => {
+    const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (booking: CreateBookingInput) => createBooking(booking),
         onSuccess: (data) => {
-            console.log(data)
+            queryClient.invalidateQueries({queryKey:['bookings']})
         },
         onError: (error) => {
             console.log(error)

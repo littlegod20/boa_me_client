@@ -25,6 +25,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import * as WebBrowser from 'expo-web-browser'
 import { findBookingById } from '../../services/booking.service'
 import { BookingStatus } from '../../types/booking.types'
+import { useQueryClient } from '@tanstack/react-query'
 
 type BookServiceScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'BookService'>
 type BookServiceScreenRouteProp = RouteProp<HomeStackParamList, 'BookService'>
@@ -46,6 +47,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
   // const [longitude, setLongitude] = useState<number | undefined>(undefined)
   const [showPicker, setShowPicker] = useState(false)
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date')
+  const queryClient = useQueryClient()
 
   const onChangeDate = (event: any, selected?: Date) => {
     if (event.type === 'dismissed') {
@@ -113,6 +115,7 @@ export default function BookServiceScreen({ navigation, route }: Props) {
       const confirmed = await verifyBooking({bookingId})
 
       if(confirmed){
+        queryClient.invalidateQueries({queryKey:['bookings']})
         navigation.navigate('Home')
       } else {
         Alert.alert('Payment processing', "We'll update your booking shortly.")
