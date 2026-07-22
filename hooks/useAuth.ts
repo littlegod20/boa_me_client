@@ -22,8 +22,7 @@ export const useLoginMutation = () => {
 export const useRegisterMutation = () => {
     const navigation = useNavigation<StackNavigationProp<AuthStackParamList, 'Register'>>()
     return useMutation({
-        mutationFn: ({ name, email, password, role, phone_number }: z.infer<typeof registerSchema>) =>
-            registerUser(name, email, password, role, phone_number),
+        mutationFn: (data: z.infer<typeof registerSchema>) => registerUser(data),
         onSuccess: (data) => {
             navigation.navigate('VerifyEmail', { email: data.email })
         },

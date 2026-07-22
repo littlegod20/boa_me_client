@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Role } from "../types/auth.types";
+import { MomoProvider, PayoutMethod } from "../types/provider.types";
 
 export const loginSchema = z.object({
     email: z.email(),
@@ -32,4 +33,31 @@ export const registerSchema = z.object({
     }),
     address: z.string().optional(),
     profile_picture: z.string().optional(),
+    payout_method: z.enum(Object.values(PayoutMethod)).optional(),
+    momo_number: z.string().optional(),
+    momo_provider: z.enum(Object.values(MomoProvider)).optional(),
+    bank_account_number: z.string().optional(),
+    bank_account_name: z.string().optional(),
+    service_area: z.string().optional(),
+}).superRefine((data, ctx) => {
+    if (data.role !== Role.PROVIDER) return
+
+    if (!data.payout_method) {
+        ctx.addIssue({ code: 'custom', path: ['payout_method'], message: 'Payout method is required' })
+        return
+    }
+
+    if (data.payout_method === PayoutMethod.MOBILE_MONEY) {
+        if (!data.momo_number) ctx.addIssue({ code: 'custom', path: ['momo_number'], message: 'MoMo number required' })
+        if (!data.momo_provider) ctx.addIssue({ code: 'custom', path: ['momo_provider'], message: 'MoMo provider required' })
+    }
+
+    if (data.payout_method === PayoutMethod.BANK) {
+        if (!data.bank_account_number) ctx.addIssue({ code: 'custom', path: ['bank_account_number'], message: 'Account number required' })
+        if (!data.bank_account_name) ctx.addIssue({ code: 'custom', path: ['bank_account_name'], message: 'Account name required' })
+    }
+
+    if (!data.service_area) {
+        ctx.addIssue({ code: 'custom', path: ['service_area'], message: 'Service area is required' })
+    }
 })

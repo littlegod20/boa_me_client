@@ -15,6 +15,7 @@ import GoogleSignInBtn from "../../components/shared/GoogleSignInBtn";
 import AuthDivider from "../../components/shared/AuthDivider";
 import { Role } from "../../types/auth.types";
 import { useTheme } from "../../context/ThemeContext";
+import { MomoProvider, PayoutMethod } from "../../types/provider.types";
 
 type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, "Register">;
 
@@ -22,28 +23,90 @@ type Props = {
     navigation: RegisterScreenNavigationProp;
 };
 
+type RegisterFormValues = z.infer<typeof registerSchema>;
+
 const roleOptions = [
     { label: "Customer", value: Role.CUSTOMER },
     { label: "Provider", value: Role.PROVIDER },
 ] as const;
 
+const payoutOptions = [
+    { label: "Mobile Money", value: PayoutMethod.MOBILE_MONEY },
+    { label: "Bank", value: PayoutMethod.BANK },
+] as const;
+
+const momoProviderOptions = [
+    { label: "MTN", value: MomoProvider.MTN },
+    { label: "Telecel", value: MomoProvider.TELECEL },
+    { label: "AirtelTigo", value: MomoProvider.AIRTEL_TIGO },
+] as const;
+
+type OptionSelectorProps<T extends string> = {
+    label: string;
+    options: readonly { label: string; value: T }[];
+    value?: T;
+    onChange: (value: T) => void;
+    error?: string;
+};
+
+function OptionSelector<T extends string>({ label, options, value, onChange, error }: OptionSelectorProps<T>) {
+    const { colors } = useTheme();
+    return (
+        <View style={styles.selectorGroup}>
+            <Text style={[styles.selectorLabel, { color: colors.primary }]}>{label}</Text>
+            <View style={styles.selectorRow}>
+                {options.map((option) => {
+                    const isSelected = value === option.value;
+                    return (
+                        <Pressable
+                            key={option.value}
+                            accessibilityRole="button"
+                            onPress={() => onChange(option.value)}
+                            style={[
+                                styles.roleOption,
+                                { borderColor: colors.border },
+                                isSelected && { borderColor: colors.primary, backgroundColor: colors.primary },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.roleOptionText,
+                                    { color: colors.text },
+                                    isSelected && { color: colors.background },
+                                ]}
+                            >
+                                {option.label}
+                            </Text>
+                        </Pressable>
+                    );
+                })}
+            </View>
+            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
+        </View>
+    );
+}
+
 export default function RegisterScreen({ navigation }: Props) {
-    const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<
-        z.infer<typeof registerSchema>
-    >({
+    const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<RegisterFormValues>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
             role: Role.CUSTOMER,
+            payout_method: PayoutMethod.MOBILE_MONEY,
+            momo_number: "",
+            momo_provider: undefined,
+            bank_account_number: "",
+            bank_account_name: "",
+            service_area: "",
         },
     });
     const { mutate, isPending, error } = useRegisterMutation();
     const { mutate: signInWithGoogle, isPending: isGooglePending, error: googleError } = useGoogleSignInMutation();
     const selectedRole = watch("role");
+    const payoutMethod = watch("payout_method");
     const { colors } = useTheme();
 
-    const handleRegister: SubmitHandler<z.infer<typeof registerSchema>> = (data) => {
+    const handleRegister: SubmitHandler<RegisterFormValues> = (data) => {
         mutate(data);
-        // console.log(data);
     };
 
     return (
@@ -126,9 +189,9 @@ export default function RegisterScreen({ navigation }: Props) {
                     )}
                 />
 
-                <View style={styles.roleGroup}>
-                    <Text style={[styles.roleLabel, { color: colors.primary }]}>I am a</Text>
-                    <View style={styles.roleRow}>
+                <View style={styles.selectorGroup}>
+                    <Text style={[styles.selectorLabel, { color: colors.primary }]}>I am a</Text>
+                    <View style={styles.selectorRow}>
                         {roleOptions.map(({ label, value }) => (
                             <Pressable
                                 key={value}
@@ -152,9 +215,107 @@ export default function RegisterScreen({ navigation }: Props) {
                         ))}
                     </View>
                     {errors.role?.message && (
-                        <Text style={styles.error}>{errors.role.message}</Text>
+                        <Text style={[styles.error, { color: colors.error }]}>{errors.role.message}</Text>
                     )}
                 </View>
+
+                {selectedRole === Role.PROVIDER && (
+                    <>
+                        <Controller
+                            control={control}
+                            name="payout_method"
+                            render={({ field: { onChange, value } }) => (
+                                <OptionSelector
+                                    label="Payout method"
+                                    options={payoutOptions}
+                                    value={value}
+                                    onChange={onChange}
+                                    error={errors.payout_method?.message}
+                                />
+                            )}
+                        />
+
+                        {payoutMethod === PayoutMethod.MOBILE_MONEY ? (
+                            <>
+                                <Controller
+                                    control={control}
+                                    name="momo_number"
+                                    render={({ field: { onChange, value } }) => (
+                                        <BoamePhoneInput
+                                            label="Mobile Money number"
+                                            onChangeFormattedText={onChange}
+                                            value={value}
+                                            error={errors.momo_number?.message}
+                                        />
+                                    )}
+                                />
+
+                                <Controller
+                                    control={control}
+                                    name="momo_provider"
+                                    render={({ field: { onChange, value } }) => (
+                                        <OptionSelector
+                                            label="Mobile Money provider"
+                                            options={momoProviderOptions}
+                                            value={value}
+                                            onChange={onChange}
+                                            error={errors.momo_provider?.message}
+                                        />
+                                    )}
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <Controller
+                                    control={control}
+                                    name="bank_account_number"
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <BoameInput
+                                            label="Bank account number"
+                                            placeholder="Enter your account number"
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            value={value}
+                                            keyboardType="number-pad"
+                                            error={errors.bank_account_number?.message}
+                                        />
+                                    )}
+                                />
+
+                                <Controller
+                                    control={control}
+                                    name="bank_account_name"
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <BoameInput
+                                            label="Account holder name"
+                                            placeholder="Enter the name on the account"
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            value={value}
+                                            autoCapitalize="words"
+                                            error={errors.bank_account_name?.message}
+                                        />
+                                    )}
+                                />
+                            </>
+                        )}
+
+                        <Controller
+                            control={control}
+                            name="service_area"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <BoameInput
+                                    label="Service area"
+                                    placeholder="e.g. Accra, East Legon"
+                                    onChangeText={onChange}
+                                    onBlur={onBlur}
+                                    value={value}
+                                    error={errors.service_area?.message}
+                                />
+                            )}
+                        />
+                    </>
+                )}
 
                 <BoameBtn
                     title="Register"
@@ -199,15 +360,15 @@ const styles = StyleSheet.create({
     input: {
         fontFamily: fonts.regular,
     },
-    roleGroup: {
+    selectorGroup: {
         marginBottom: 12,
     },
-    roleLabel: {
+    selectorLabel: {
         fontSize: typography.sizes.sm,
         fontFamily: fonts.regular,
         marginBottom: spacing.sm
     },
-    roleRow: {
+    selectorRow: {
         flexDirection: "row",
         gap: spacing.sm,
     },
