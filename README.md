@@ -1,6 +1,6 @@
 # Boame Client
 
-React Native (Expo) mobile app for **Boame** — a service marketplace that connects customers to vetted providers for domestic and commercial services, starting with car wash and home cleaning.
+React Native (Expo) mobile app for **Boame** — a service marketplace that connects customers to registered providers for domestic and commercial services, starting with car wash and home cleaning.
 
 Built by **Asante** as a full-stack portfolio project. Pairs with the [Boame API](https://github.com/littlegod20/boa_me).
 
@@ -24,7 +24,6 @@ Customers browse services, pick a provider, book and pay via Mobile Money or car
 | Forms | React Hook Form + Zod | Schema-first validation aligned with the API |
 | HTTP | Axios | JWT attach + global 401 logout |
 | Realtime | Socket.io client | Chat and unread message sync |
-| Maps / location | react-native-maps + expo-location | Service location on bookings |
 | Auth extras | expo-auth-session + expo-web-browser | Google OAuth and Paystack checkout |
 | UI | Custom theme + Lucide icons | Brand fonts (Abres, Montserrat), light/dark themes |
 
@@ -196,12 +195,38 @@ npx eas build --profile development --platform android
 | Google OAuth | `expo-auth-session` → backend token → store |
 | Payments | Booking flow opens Paystack URL via `expo-web-browser` |
 | Chat | `SocketProvider` + conversation/message services |
-| Location | `expo-location` permission + maps on booking |
+| Location | Text-based location on bookings (map picker planned) |
 | Deep linking | Scheme `boame` in `app.json` |
 
 ---
 
+## Engineering Highlights
+
+**Payment verification via webhook, not redirect.** Paystack redirects after
+checkout can't reliably reach a mobile app's custom scheme, so the client
+doesn't trust the redirect. After the in-app browser closes, it polls the
+booking status — which the backend flips only after verifying Paystack's
+server-to-server webhook. The webhook is the source of truth; the client
+confirms against it.
+
+**Cursor-based pagination for chat.** Message history loads newest-first in
+fixed pages using a compound cursor (created_at + id) rather than OFFSET,
+which avoids duplicated/skipped messages when new messages arrive mid-scroll.
+Live socket messages merge with the paginated history, deduplicated by id.
+
+**Realtime + paginated history, reconciled.** The chat screen derives its
+message list from two sources — an infinite query (server history) and live
+socket state — merged and deduped, so pagination and live delivery coexist
+without overwriting each other.
+
+**Role-based app shell.** Registering as a provider issues a new JWT with the
+updated role; the root navigator switches the entire tab structure reactively
+when the token changes — no manual navigation.
+
 ## Planned / related
+
+- Map-based location picker (react-native-maps + geocoding) — coordinate
+  columns and location libraries are already in place; pin-drop UI pending
 
 Backend-planned features that will land in this client over time:
 
